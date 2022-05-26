@@ -6,11 +6,7 @@ local function request_symbol(for_buf, handler)
 		"textDocument/documentSymbol",
 		{ textDocument = vim.lsp.util.make_text_document_params() },
 		function(symbols)
-			for _, v in pairs(symbols) do
-				symbols = v.result
-				break
-			end
-			handler(symbols)
+			handler(for_buf, symbols[vim.b.gps_client_id].result)
 		end
 	)
 end
@@ -71,24 +67,44 @@ local function parse(symbols, for_buf)
 	return parsed_symbols
 end
 
-local function handler(symbols)
-	local for_buf = vim.api.nvim_get_current_buf()
+local function update_data(for_buf, symbols)
 	vim.b.gps_symbols = parse(symbols, for_buf)
 end
 
 function M.get_data()
-	request_symbol(vim.api.nvim_get_current_buf(), handler)
+	-- request_symbol(vim.api.nvim_get_current_buf(), handler)
 	vim.pretty_print(vim.b.gps_symbols)
 end
 
-local gps_augroup = vim.api.nvim_create_augroup("gps", {clear = true})
-vim.api.nvim_create_autocmd(
-	{"InsertLeave", "BufEnter"},
-	{
-		callback = function()
-			request_symbol(0, handler)
-		end
-	}
-)
+function M.attach(client, bufnr)
+	if not client.server_capabilites.documentSymbolProvider then
+		vim.notify("nvim-gps-2: Server "..client.name.." does not support documentSymbols", vim.log.levels.ERROR)
+		return
+	end
+
+	if vim.b.gps_client_id ~= nil then
+		local prev_client = vim.lsp.get_client_by_id(vim.b.gps_client_id)
+		vim.notify("nvim-gps-2: Failed to attach to "..client.name.." for current buffer. Already attached to "..prev_client.name)
+		return
+	end
+
+	vim.b.gps_client_id = client.id
+
+	local gps_augroup = vim.api.nvim_create_augroup("gps", { clear = false })
+	vim.api.nvim_clear_autocmds({
+		buffer = bufnr,
+		group = gps_augroup
+	})
+	vim.api.nvim_create_autocmd(
+		{"InsertLeave", "BufEnter"},
+		{
+			callback = function()
+				request_symbol(bufnr, update_data)
+			end,
+			group = gps_augroup,
+			buffer = bufnr
+		}
+	)
+end
 
 return M
