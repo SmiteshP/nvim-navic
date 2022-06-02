@@ -1,5 +1,6 @@
 local M = {}
 
+-- Make request to lsp server
 local function request_symbol(for_buf, handler)
 	vim.lsp.buf_request_all(
 		for_buf,
@@ -11,6 +12,7 @@ local function request_symbol(for_buf, handler)
 	)
 end
 
+-- Process raw data from lsp server
 local function parse(symbols, for_buf)
 	local parsed_symbols = {}
 
@@ -71,6 +73,66 @@ local function update_data(for_buf, symbols)
 	vim.b.gps_symbols = parse(symbols, for_buf)
 end
 
+local function in_range(cursor_pos, range)
+	local line = cursor_pos[1]
+	local char = cursor_pos[2]
+
+	if line < range["start"].line or line > range["end"].line then
+		return false
+	end
+
+	if
+		line == range["start"].line and char < range["start"].character
+		or line == range["end"].line and char > range["end"].character
+	then
+		return false
+	end
+
+	return true
+end
+
+local function update_context()
+	local smallest_unchanged_context = nil
+	local unchanged_context_index = 0
+	local cursor_pos = vim.api.nvim_win_get_cursor()
+
+	-- Find larger context that remained same
+	if vim.b.context_data ~= nil then
+		for i, context in ipairs(vim.b.context_data) do
+			if in_range(cursor_pos, context.scope) then
+				unchanged_context_index = i
+				smallest_unchanged_context = context
+			end
+		end
+	end
+
+	-- Flush out changed context
+	unchanged_context_index = unchanged_context_index+1
+	for i = unchanged_context_index, #vim.b.context_data, 1 do
+		vim.b.context_data[i] = nil
+	end
+
+	local curr
+
+	if smallest_unchanged_context == nil then
+		unchanged_context_index = 0
+		curr = vim.b.gps_symbols
+	else
+		curr = smallest_unchanged_context.children
+	end
+
+	-- Fill out context_data
+	while curr ~= nil do
+		for _, v in ipairs(curr) do
+			if in_range(cursor_pos, v.scope) then
+				vim.b.context_data[#vim.b.context_data+1] = v
+				curr = v.children
+				break
+			end
+		end
+	end
+end
+
 function M.get_data()
 	-- request_symbol(vim.api.nvim_get_current_buf(), handler)
 	vim.pretty_print(vim.b.gps_symbols)
@@ -105,6 +167,16 @@ function M.attach(client, bufnr)
 			buffer = bufnr
 		}
 	)
+	vim.api.nvim_create_autocmd({
+		{"CursorHold", "CursorMoved"},
+		{
+			callback = function()
+				update_context()
+			end,
+			group = gps_augroup,
+			buffer = bufnr
+		}
+	})
 end
 
 return M
