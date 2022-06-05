@@ -1,14 +1,14 @@
 local M = {}
 
 -- Make request to lsp server
-local function request_symbol(for_buf, handler)
+local function request_symbol(for_buf, handler, client_id)
 	vim.lsp.buf_request_all(
 		for_buf,
 		"textDocument/documentSymbol",
 		{ textDocument = vim.lsp.util.make_text_document_params() },
 		function(symbols)
-			if not symbols[vim.b.gps_client_id].error then
-				handler(for_buf, symbols[vim.b.gps_client_id].result)
+			if not symbols[client_id].error then
+				handler(for_buf, symbols[client_id].result)
 			end
 		end
 	)
@@ -71,8 +71,11 @@ local function parse(symbols, for_buf)
 	return parsed_symbols
 end
 
+local gps_symbols = {}
+local gps_context_data = {}
+
 local function update_data(for_buf, symbols)
-	vim.b.gps_symbols = parse(symbols, for_buf)
+	gps_symbols[for_buf] = parse(symbols, for_buf)
 end
 
 local function in_range(cursor_pos, range)
@@ -93,14 +96,19 @@ local function in_range(cursor_pos, range)
 	return true
 end
 
-local function update_context()
+local function update_context(for_buf)
 	local smallest_unchanged_context = nil
 	local unchanged_context_index = 0
 	local cursor_pos = vim.api.nvim_win_get_cursor(0)
 
+	if gps_context_data[for_buf] == nil then
+		gps_context_data[for_buf] = {}
+	end
+	local context_data = gps_context_data[for_buf]
+
 	-- Find larger context that remained same
-	if vim.b.context_data ~= nil then
-		for i, context in ipairs(vim.b.context_data) do
+	if context_data ~= nil then
+		for i, context in ipairs(context_data) do
 			if in_range(cursor_pos, context.scope) then
 				unchanged_context_index = i
 				smallest_unchanged_context = context
@@ -109,18 +117,18 @@ local function update_context()
 
 		-- Flush out changed context
 		unchanged_context_index = unchanged_context_index+1
-		for i = unchanged_context_index, #vim.b.context_data, 1 do
-			vim.b.context_data[i] = nil
+		for i = unchanged_context_index, #context_data, 1 do
+			context_data[i] = nil
 		end
 	else
-		vim.b.context_data = {}
+		context_data = {}
 	end
 
 	local curr = nil
 
 	if smallest_unchanged_context == nil then
 		unchanged_context_index = 0
-		curr = vim.b.gps_symbols
+		curr = gps_symbols[for_buf]
 	else
 		curr = smallest_unchanged_context.children
 	end
@@ -129,10 +137,10 @@ local function update_context()
 	while curr ~= nil do
 		local go_deeper = false
 		for _, v in ipairs(curr) do
-			-- print("HERE", vim.inspect(cursor_pos))
 			if in_range(cursor_pos, v.scope) then
-				vim.b.context_data[#vim.b.context_data+1] = v
-				-- print(curr.name)
+				print("HERE 1", #context_data)
+				table.insert(context_data, v)
+				print("HERE 2", #context_data)
 				curr = v.children
 				go_deeper = true
 				break
@@ -142,6 +150,7 @@ local function update_context()
 			break
 		end
 	end
+	-- vim.pretty_print(vim.b.context_data)
 end
 
 function M.get_data()
@@ -161,8 +170,6 @@ function M.attach(client, bufnr)
 		return
 	end
 
-	vim.b.gps_client_id = client.id
-
 	local gps_augroup = vim.api.nvim_create_augroup("gps", { clear = false })
 	vim.api.nvim_clear_autocmds({
 		buffer = bufnr,
@@ -172,7 +179,7 @@ function M.attach(client, bufnr)
 		{"InsertLeave", "BufEnter"},
 		{
 			callback = function()
-				request_symbol(bufnr, update_data)
+				request_symbol(bufnr, update_data, client.id)
 			end,
 			group = gps_augroup,
 			buffer = bufnr
@@ -182,7 +189,7 @@ function M.attach(client, bufnr)
 		{"CursorHold", "CursorMoved"},
 		{
 			callback = function()
-				update_context()
+				update_context(bufnr)
 			end,
 			group = gps_augroup,
 			buffer = bufnr
@@ -191,7 +198,7 @@ function M.attach(client, bufnr)
 end
 
 function M.test()
-	request_symbol(0, update_data)
+	vim.pretty_print(gps_context_data[vim.api.nvim_get_current_buf()])
 end
 
 return M
