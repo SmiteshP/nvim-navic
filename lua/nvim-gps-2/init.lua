@@ -7,7 +7,9 @@ local function request_symbol(for_buf, handler)
 		"textDocument/documentSymbol",
 		{ textDocument = vim.lsp.util.make_text_document_params() },
 		function(symbols)
-			handler(for_buf, symbols[vim.b.gps_client_id].result)
+			if not symbols[vim.b.gps_client_id].error then
+				handler(for_buf, symbols[vim.b.gps_client_id].result)
+			end
 		end
 	)
 end
@@ -94,7 +96,7 @@ end
 local function update_context()
 	local smallest_unchanged_context = nil
 	local unchanged_context_index = 0
-	local cursor_pos = vim.api.nvim_win_get_cursor()
+	local cursor_pos = vim.api.nvim_win_get_cursor(0)
 
 	-- Find larger context that remained same
 	if vim.b.context_data ~= nil then
@@ -104,15 +106,17 @@ local function update_context()
 				smallest_unchanged_context = context
 			end
 		end
+
+		-- Flush out changed context
+		unchanged_context_index = unchanged_context_index+1
+		for i = unchanged_context_index, #vim.b.context_data, 1 do
+			vim.b.context_data[i] = nil
+		end
+	else
+		vim.b.context_data = {}
 	end
 
-	-- Flush out changed context
-	unchanged_context_index = unchanged_context_index+1
-	for i = unchanged_context_index, #vim.b.context_data, 1 do
-		vim.b.context_data[i] = nil
-	end
-
-	local curr
+	local curr = nil
 
 	if smallest_unchanged_context == nil then
 		unchanged_context_index = 0
@@ -123,12 +127,19 @@ local function update_context()
 
 	-- Fill out context_data
 	while curr ~= nil do
+		local go_deeper = false
 		for _, v in ipairs(curr) do
+			-- print("HERE", vim.inspect(cursor_pos))
 			if in_range(cursor_pos, v.scope) then
 				vim.b.context_data[#vim.b.context_data+1] = v
+				-- print(curr.name)
 				curr = v.children
+				go_deeper = true
 				break
 			end
+		end
+		if not go_deeper then
+			break
 		end
 	end
 end
@@ -139,7 +150,7 @@ function M.get_data()
 end
 
 function M.attach(client, bufnr)
-	if not client.server_capabilites.documentSymbolProvider then
+	if not client.server_capabilities.documentSymbolProvider then
 		vim.notify("nvim-gps-2: Server "..client.name.." does not support documentSymbols", vim.log.levels.ERROR)
 		return
 	end
@@ -167,7 +178,7 @@ function M.attach(client, bufnr)
 			buffer = bufnr
 		}
 	)
-	vim.api.nvim_create_autocmd({
+	vim.api.nvim_create_autocmd(
 		{"CursorHold", "CursorMoved"},
 		{
 			callback = function()
@@ -176,7 +187,11 @@ function M.attach(client, bufnr)
 			group = gps_augroup,
 			buffer = bufnr
 		}
-	})
+	)
+end
+
+function M.test()
+	request_symbol(0, update_data)
 end
 
 return M
