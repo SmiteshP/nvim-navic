@@ -150,6 +150,75 @@ local function update_context(for_buf)
 	end
 end
 
+local config = {
+	icons = {
+		[1] = " ", -- File
+		[2] = " ", -- Module
+		[3] = " ", -- Namespace
+		[4] = " ", -- Package
+		[5] = " ", -- Class
+		[6] = " ", -- Method
+		[7] = " ", -- Property
+		[8] = " ", -- Field
+		[9] = " ", -- Constructor
+		[10] = "練", -- Enum
+		[11] = "練", -- Interface
+		[12] = " ", -- Function
+		[13] = " ", -- Variable
+		[14] = " ", -- Constant
+		[15] = " ", -- String
+		[16] = " ", -- Number
+		[17] = "◩ ", -- Boolean
+		[18] = " ", -- Array
+		[19] = " ", -- Object
+		[20] = " ", -- Key
+		[21] = "ﳠ ", -- Null
+		[22] = " ", -- EnumMember
+		[23] = " ", -- Struct
+		[24] = " ", -- Event
+		[25] = " ", -- Operator
+		[26] = " ", -- TypeParameter
+	}
+}
+
+function M.setup(opts)
+	local lsp_mapping = {
+		File          = 1,
+		Module        = 2,
+		Namespace     = 3,
+		Package       = 4,
+		Class         = 5,
+		Method        = 6,
+		Property      = 7,
+		Field         = 8,
+		Constructor   = 9,
+		Enum          = 10,
+		Interface     = 11,
+		Function      = 12,
+		Variable      = 13,
+		Constant      = 14,
+		String        = 15,
+		Number        = 16,
+		Boolean       = 17,
+		Array         = 18,
+		Object        = 19,
+		Key           = 20,
+		Null          = 21,
+		EnumMember    = 22,
+		Struct        = 23,
+		Event         = 24,
+		Operator      = 25,
+		TypeParameter = 26,
+	}
+
+	if opts.icons ~= nil then
+		for k, v in pairs(opts.icons) do
+			config[lsp_mapping[k]] = v
+		end
+	end
+
+end
+
 -- returns table of context or nil
 function M.get_data()
 	local context_data = gps_context_data[vim.api.nvim_get_current_buf()]
@@ -180,7 +249,7 @@ function M.get_location()
 	local location = {}
 
 	for _, v in ipairs(data) do
-		table.insert(location, v.kind .. " " .. v.name)
+		table.insert(location, config.icons[v.kind] .. v.name)
 	end
 
 	return table.concat(location, " > ")
