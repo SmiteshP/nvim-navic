@@ -148,26 +148,42 @@ local function update_context(for_buf)
 			break
 		end
 	end
-	-- vim.pretty_print(vim.b.context_data)
 end
 
+-- returns table of context or nil
 function M.get_data()
+	local context_data = gps_context_data[vim.api.nvim_get_current_buf()]
+
+	if context_data == nil then
+		return nil
+	end
+
 	local ret = {}
 
-	for _, v in ipairs(gps_context_data[vim.api.nvim_get_current_buf()]) do
+	for _, v in ipairs(context_data) do
 		table.insert(ret, {
 			kind = v.kind,
 			name = v.name
 		})
 	end
 
-	local loc = " - "
+	return ret
+end
 
-	for _, v in ipairs(ret) do
-		loc = loc .. " > " .. v.name
+function M.get_location()
+	local data = M.get_data()
+
+	if data == nil then
+		return ""
 	end
 
-	return loc
+	local location = {}
+
+	for _, v in ipairs(data) do
+		table.insert(location, v.kind .. " " .. v.name)
+	end
+
+	return table.concat(location, " > ")
 end
 
 function M.attach(client, bufnr)
@@ -190,7 +206,7 @@ function M.attach(client, bufnr)
 		group = gps_augroup
 	})
 	vim.api.nvim_create_autocmd(
-		{"InsertLeave", "BufEnter"},
+		{"InsertLeave", "BufEnter", "CursorHold"},
 		{
 			callback = function()
 				request_symbol(bufnr, update_data, client.id)
@@ -213,17 +229,12 @@ function M.attach(client, bufnr)
 		{"CursorHold", "CursorMoved"},
 		{
 			callback = function()
-				print(M.get_data())
+				print(M.get_location())
 			end,
 			group = gps_augroup,
 			buffer = bufnr
 		}
 	)
-end
-
-function M.test()
-	-- vim.pretty_print(gps_context_data[vim.api.nvim_get_current_buf()])
-	vim.pretty_print(gps_context_data)
 end
 
 return M
