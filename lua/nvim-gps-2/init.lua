@@ -138,9 +138,7 @@ local function update_context(for_buf)
 		local go_deeper = false
 		for _, v in ipairs(curr) do
 			if in_range(cursor_pos, v.scope) then
-				print("HERE 1", #context_data)
 				table.insert(context_data, v)
-				print("HERE 2", #context_data)
 				curr = v.children
 				go_deeper = true
 				break
@@ -154,8 +152,22 @@ local function update_context(for_buf)
 end
 
 function M.get_data()
-	-- request_symbol(vim.api.nvim_get_current_buf(), handler)
-	vim.pretty_print(vim.b.gps_symbols)
+	local ret = {}
+
+	for _, v in ipairs(gps_context_data[vim.api.nvim_get_current_buf()]) do
+		table.insert(ret, {
+			kind = v.kind,
+			name = v.name
+		})
+	end
+
+	local loc = " - "
+
+	for _, v in ipairs(ret) do
+		loc = loc .. " > " .. v.name
+	end
+
+	return loc
 end
 
 function M.attach(client, bufnr)
@@ -165,10 +177,12 @@ function M.attach(client, bufnr)
 	end
 
 	if vim.b.gps_client_id ~= nil then
-		local prev_client = vim.lsp.get_client_by_id(vim.b.gps_client_id)
-		vim.notify("nvim-gps-2: Failed to attach to "..client.name.." for current buffer. Already attached to "..prev_client.name)
+		local prev_client = vim.lsp.get_client_by_id(client.id)
+		vim.notify("nvim-gps-2: Failed to attach to "..client.name.." for current buffer. Already attached to "..prev_client.name, vim.log.levels.WARN)
 		return
 	end
+
+	vim.b.gps_client_id = client.id
 
 	local gps_augroup = vim.api.nvim_create_augroup("gps", { clear = false })
 	vim.api.nvim_clear_autocmds({
@@ -195,10 +209,21 @@ function M.attach(client, bufnr)
 			buffer = bufnr
 		}
 	)
+	vim.api.nvim_create_autocmd(
+		{"CursorHold", "CursorMoved"},
+		{
+			callback = function()
+				print(M.get_data())
+			end,
+			group = gps_augroup,
+			buffer = bufnr
+		}
+	)
 end
 
 function M.test()
-	vim.pretty_print(gps_context_data[vim.api.nvim_get_current_buf()])
+	-- vim.pretty_print(gps_context_data[vim.api.nvim_get_current_buf()])
+	vim.pretty_print(gps_context_data)
 end
 
 return M
