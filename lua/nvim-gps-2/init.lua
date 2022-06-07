@@ -311,16 +311,6 @@ function M.attach(client, bufnr)
 			buffer = bufnr
 		}
 	)
-	vim.api.nvim_create_autocmd(
-		{"CursorHold", "CursorMoved"},
-		{
-			callback = function()
-				print(M.get_location())
-			end,
-			group = gps_augroup,
-			buffer = bufnr
-		}
-	)
 end
 
 return M
