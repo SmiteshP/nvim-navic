@@ -1,5 +1,7 @@
 local M = {}
 
+-- @Private Methods
+
 -- Make request to lsp server
 local function request_symbol(for_buf, handler, client_id)
 	vim.lsp.buf_request_all(
@@ -79,21 +81,26 @@ local function update_data(for_buf, symbols)
 end
 
 local function in_range(cursor_pos, range)
+	-- -1 = behind
+	--  0 = in range
+	--  1 = ahead
+
 	local line = cursor_pos[1]
 	local char = cursor_pos[2]
 
-	if line < range["start"].line or line > range["end"].line then
-		return false
+	if line < range["start"].line then
+		return -1
+	elseif line > range["end"].line then
+		return 1
 	end
 
-	if
-		line == range["start"].line and char < range["start"].character
-		or line == range["end"].line and char > range["end"].character
-	then
-		return false
+	if line == range["start"].line and char < range["start"].character then
+		return -1
+	elseif line == range["end"].line and char > range["end"].character then
+		return 1
 	end
 
-	return true
+	return 0
 end
 
 local function update_context(for_buf)
@@ -109,7 +116,7 @@ local function update_context(for_buf)
 	-- Find larger context that remained same
 	if context_data ~= nil then
 		for i, context in ipairs(context_data) do
-			if in_range(cursor_pos, context.scope) then
+			if in_range(cursor_pos, context.scope) == 0 then
 				unchanged_context_index = i
 				smallest_unchanged_context = context
 			end
@@ -136,10 +143,18 @@ local function update_context(for_buf)
 	-- Fill out context_data
 	while curr ~= nil do
 		local go_deeper = false
-		for _, v in ipairs(curr) do
-			if in_range(cursor_pos, v.scope) then
-				table.insert(context_data, v)
-				curr = v.children
+		local l = 1
+		local h = #curr
+		while l <= h do
+			local m = ((l+h) - (l+h)%2)/2
+			local comp = in_range(cursor_pos, curr[m].scope)
+			if comp == -1 then
+				h = m-1
+			elseif comp == 1 then
+				l = m+1
+			else
+				table.insert(context_data, curr[m])
+				curr = curr[m].children
 				go_deeper = true
 				break
 			end
@@ -180,6 +195,8 @@ local config = {
 		[26] = " ", -- TypeParameter
 	}
 }
+
+-- @Public Methods
 
 function M.setup(opts)
 	local lsp_mapping = {
