@@ -193,7 +193,10 @@ local config = {
 		[24] = " ", -- Event
 		[25] = " ", -- Operator
 		[26] = " ", -- TypeParameter
-	}
+	},
+	seperator = " > ",
+	depth = 0,
+	depth_limit_indicator = ".."
 }
 
 -- @Public Methods
@@ -234,6 +237,9 @@ function M.setup(opts)
 		end
 	end
 
+	config.seperator = opts.seperator or config.seperator
+	config.depth = opts.depth or config.depth
+	config.depth_limit_indicator = opts.depth_limit_indicator or config.depth_limit_indicator
 end
 
 -- returns table of context or nil
@@ -269,7 +275,12 @@ function M.get_location()
 		table.insert(location, config.icons[v.kind] .. v.name)
 	end
 
-	return table.concat(location, " > ")
+	if config.depth ~= 0 and #location > config.depth then
+		location = vim.list_slice(location, #location-config.depth+1, #location)
+		table.insert(location, 1, config.depth_limit_indicator)
+	end
+
+	return table.concat(location, config.seperator)
 end
 
 function M.attach(client, bufnr)
