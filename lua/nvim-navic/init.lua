@@ -262,6 +262,10 @@ function M.get_data()
 	return ret
 end
 
+function M.is_available()
+	return vim.b.gps_client_id ~= nil
+end
+
 function M.get_location()
 	local data = M.get_data()
 
