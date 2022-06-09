@@ -73,11 +73,11 @@ local function parse(symbols, for_buf)
 	return parsed_symbols
 end
 
-local gps_symbols = {}
-local gps_context_data = {}
+local navic_symbols = {}
+local navic_context_data = {}
 
 local function update_data(for_buf, symbols)
-	gps_symbols[for_buf] = parse(symbols, for_buf)
+	navic_symbols[for_buf] = parse(symbols, for_buf)
 end
 
 local function in_range(cursor_pos, range)
@@ -108,10 +108,10 @@ local function update_context(for_buf)
 	local unchanged_context_index = 0
 	local cursor_pos = vim.api.nvim_win_get_cursor(0)
 
-	if gps_context_data[for_buf] == nil then
-		gps_context_data[for_buf] = {}
+	if navic_context_data[for_buf] == nil then
+		navic_context_data[for_buf] = {}
 	end
-	local context_data = gps_context_data[for_buf]
+	local context_data = navic_context_data[for_buf]
 
 	-- Find larger context that remained same
 	if context_data ~= nil then
@@ -135,7 +135,7 @@ local function update_context(for_buf)
 
 	if smallest_unchanged_context == nil then
 		unchanged_context_index = 0
-		curr = gps_symbols[for_buf]
+		curr = navic_symbols[for_buf]
 	else
 		curr = smallest_unchanged_context.children
 	end
@@ -244,7 +244,7 @@ end
 
 -- returns table of context or nil
 function M.get_data()
-	local context_data = gps_context_data[vim.api.nvim_get_current_buf()]
+	local context_data = navic_context_data[vim.api.nvim_get_current_buf()]
 
 	if context_data == nil then
 		return nil
@@ -263,7 +263,7 @@ function M.get_data()
 end
 
 function M.is_available()
-	return vim.b.gps_client_id ~= nil
+	return vim.b.navic_client_id ~= nil
 end
 
 function M.get_location()
@@ -289,22 +289,22 @@ end
 
 function M.attach(client, bufnr)
 	if not client.server_capabilities.documentSymbolProvider then
-		vim.notify("nvim-gps-2: Server "..client.name.." does not support documentSymbols", vim.log.levels.ERROR)
+		vim.notify("nvim-navic: Server "..client.name.." does not support documentSymbols", vim.log.levels.ERROR)
 		return
 	end
 
-	if vim.b.gps_client_id ~= nil then
+	if vim.b.navic_client_id ~= nil then
 		local prev_client = vim.lsp.get_client_by_id(client.id)
-		vim.notify("nvim-gps-2: Failed to attach to "..client.name.." for current buffer. Already attached to "..prev_client.name, vim.log.levels.WARN)
+		vim.notify("nvim-navic: Failed to attach to "..client.name.." for current buffer. Already attached to "..prev_client.name, vim.log.levels.WARN)
 		return
 	end
 
-	vim.b.gps_client_id = client.id
+	vim.b.navic_client_id = client.id
 
-	local gps_augroup = vim.api.nvim_create_augroup("gps", { clear = false })
+	local navic_augroup = vim.api.nvim_create_augroup("navic", { clear = false })
 	vim.api.nvim_clear_autocmds({
 		buffer = bufnr,
-		group = gps_augroup
+		group = navic_augroup
 	})
 	vim.api.nvim_create_autocmd(
 		{"InsertLeave", "BufEnter", "CursorHold"},
@@ -312,7 +312,7 @@ function M.attach(client, bufnr)
 			callback = function()
 				request_symbol(bufnr, update_data, client.id)
 			end,
-			group = gps_augroup,
+			group = navic_augroup,
 			buffer = bufnr
 		}
 	)
@@ -322,7 +322,7 @@ function M.attach(client, bufnr)
 			callback = function()
 				update_context(bufnr)
 			end,
-			group = gps_augroup,
+			group = navic_augroup,
 			buffer = bufnr
 		}
 	)
