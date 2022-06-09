@@ -23,7 +23,7 @@ local function parse(symbols, for_buf)
 	local function dfs(curr_symbol)
 		local ret = {}
 
-		for _, val in ipairs(curr_symbol) do
+		for index, val in ipairs(curr_symbol) do
 			local curr_parsed_symbol = {}
 
 			local name_range = val.selectionRange
@@ -56,6 +56,7 @@ local function parse(symbols, for_buf)
 				name_range = name_range,
 				scope = scope,
 				kind = val.kind,
+				index = index
 			}
 
 			if val.children then
@@ -104,40 +105,24 @@ local function in_range(cursor_pos, range)
 end
 
 local function update_context(for_buf)
-	local smallest_unchanged_context = nil
-	local unchanged_context_index = 0
 	local cursor_pos = vim.api.nvim_win_get_cursor(0)
 
 	if navic_context_data[for_buf] == nil then
 		navic_context_data[for_buf] = {}
 	end
-	local context_data = navic_context_data[for_buf]
+	local old_context_data = navic_context_data[for_buf]
+	local new_context_data = {}
+
+	local curr = navic_symbols[for_buf]
 
 	-- Find larger context that remained same
-	if context_data ~= nil then
-		for i, context in ipairs(context_data) do
-			if in_range(cursor_pos, context.scope) == 0 then
-				unchanged_context_index = i
-				smallest_unchanged_context = context
-			end
+	for _, context in ipairs(old_context_data) do
+		if in_range(cursor_pos, context.scope) == 0 and curr[context.index] ~= nil and context.name == curr[context.index].name and context.kind == curr[context.index].kind then
+			table.insert(new_context_data, curr[context.index])
+			curr = curr[context.index].children
+		else
+			break
 		end
-
-		-- Flush out changed context
-		unchanged_context_index = unchanged_context_index+1
-		for i = unchanged_context_index, #context_data, 1 do
-			context_data[i] = nil
-		end
-	else
-		context_data = {}
-	end
-
-	local curr = nil
-
-	if smallest_unchanged_context == nil then
-		unchanged_context_index = 0
-		curr = navic_symbols[for_buf]
-	else
-		curr = smallest_unchanged_context.children
 	end
 
 	-- Fill out context_data
@@ -153,7 +138,7 @@ local function update_context(for_buf)
 			elseif comp == 1 then
 				l = m+1
 			else
-				table.insert(context_data, curr[m])
+				table.insert(new_context_data, curr[m])
 				curr = curr[m].children
 				go_deeper = true
 				break
@@ -163,6 +148,8 @@ local function update_context(for_buf)
 			break
 		end
 	end
+
+	navic_context_data[for_buf] = new_context_data
 end
 
 local config = {
