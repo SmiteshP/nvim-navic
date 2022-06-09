@@ -56,7 +56,7 @@ local function parse(symbols, for_buf)
 				name_range = name_range,
 				scope = scope,
 				kind = val.kind,
-				index = index
+				index = index,
 			}
 
 			if val.children then
@@ -117,7 +117,12 @@ local function update_context(for_buf)
 
 	-- Find larger context that remained same
 	for _, context in ipairs(old_context_data) do
-		if in_range(cursor_pos, context.scope) == 0 and curr[context.index] ~= nil and context.name == curr[context.index].name and context.kind == curr[context.index].kind then
+		if
+			in_range(cursor_pos, context.scope) == 0
+			and curr[context.index] ~= nil
+			and context.name == curr[context.index].name
+			and context.kind == curr[context.index].kind
+		then
 			table.insert(new_context_data, curr[context.index])
 			curr = curr[context.index].children
 		else
@@ -131,12 +136,12 @@ local function update_context(for_buf)
 		local l = 1
 		local h = #curr
 		while l <= h do
-			local m = ((l+h) - (l+h)%2)/2
+			local m = ((l + h) - (l + h) % 2) / 2
 			local comp = in_range(cursor_pos, curr[m].scope)
 			if comp == -1 then
-				h = m-1
+				h = m - 1
 			elseif comp == 1 then
-				l = m+1
+				l = m + 1
 			else
 				table.insert(new_context_data, curr[m])
 				curr = curr[m].children
@@ -183,12 +188,13 @@ local config = {
 	},
 	seperator = " > ",
 	depth = 0,
-	depth_limit_indicator = ".."
+	depth_limit_indicator = "..",
 }
 
 -- @Public Methods
 
 function M.setup(opts)
+	-- stylua: ignore
 	local lsp_mapping = {
 		File          = 1,
 		Module        = 2,
@@ -242,7 +248,7 @@ function M.get_data()
 	for _, v in ipairs(context_data) do
 		table.insert(ret, {
 			kind = v.kind,
-			name = v.name
+			name = v.name,
 		})
 	end
 
@@ -267,7 +273,7 @@ function M.get_location()
 	end
 
 	if config.depth ~= 0 and #location > config.depth then
-		location = vim.list_slice(location, #location-config.depth+1, #location)
+		location = vim.list_slice(location, #location - config.depth + 1, #location)
 		table.insert(location, 1, config.depth_limit_indicator)
 	end
 
@@ -276,13 +282,19 @@ end
 
 function M.attach(client, bufnr)
 	if not client.server_capabilities.documentSymbolProvider then
-		vim.notify("nvim-navic: Server "..client.name.." does not support documentSymbols", vim.log.levels.ERROR)
+		vim.notify("nvim-navic: Server " .. client.name .. " does not support documentSymbols", vim.log.levels.ERROR)
 		return
 	end
 
 	if vim.b.navic_client_id ~= nil then
 		local prev_client = vim.lsp.get_client_by_id(client.id)
-		vim.notify("nvim-navic: Failed to attach to "..client.name.." for current buffer. Already attached to "..prev_client.name, vim.log.levels.WARN)
+		vim.notify(
+			"nvim-navic: Failed to attach to "
+				.. client.name
+				.. " for current buffer. Already attached to "
+				.. prev_client.name,
+			vim.log.levels.WARN
+		)
 		return
 	end
 
@@ -291,28 +303,22 @@ function M.attach(client, bufnr)
 	local navic_augroup = vim.api.nvim_create_augroup("navic", { clear = false })
 	vim.api.nvim_clear_autocmds({
 		buffer = bufnr,
-		group = navic_augroup
+		group = navic_augroup,
 	})
-	vim.api.nvim_create_autocmd(
-		{"InsertLeave", "BufEnter", "CursorHold"},
-		{
-			callback = function()
-				request_symbol(bufnr, update_data, client.id)
-			end,
-			group = navic_augroup,
-			buffer = bufnr
-		}
-	)
-	vim.api.nvim_create_autocmd(
-		{"CursorHold", "CursorMoved"},
-		{
-			callback = function()
-				update_context(bufnr)
-			end,
-			group = navic_augroup,
-			buffer = bufnr
-		}
-	)
+	vim.api.nvim_create_autocmd({ "InsertLeave", "BufEnter", "CursorHold" }, {
+		callback = function()
+			request_symbol(bufnr, update_data, client.id)
+		end,
+		group = navic_augroup,
+		buffer = bufnr,
+	})
+	vim.api.nvim_create_autocmd({ "CursorHold", "CursorMoved" }, {
+		callback = function()
+			update_context(bufnr)
+		end,
+		group = navic_augroup,
+		buffer = bufnr,
+	})
 end
 
 return M
