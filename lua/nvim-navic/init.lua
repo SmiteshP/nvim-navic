@@ -17,7 +17,7 @@ local function request_symbol(for_buf, handler, client_id)
 end
 
 -- Process raw data from lsp server
-local function parse(symbols, for_buf)
+local function parse(symbols)
 	local parsed_symbols = {}
 
 	local function dfs(curr_symbol)
@@ -26,34 +26,12 @@ local function parse(symbols, for_buf)
 		for index, val in ipairs(curr_symbol) do
 			local curr_parsed_symbol = {}
 
-			local name_range = val.selectionRange
 			local scope = val.range
-
-			name_range["start"].line = name_range["start"].line + 1
-			name_range["end"].line = name_range["end"].line + 1
-
 			scope["start"].line = scope["start"].line + 1
 			scope["end"].line = scope["end"].line + 1
 
-			local name = ""
-			if val.name ~= "<Anonymous>" then
-				name = table.concat(
-					vim.api.nvim_buf_get_text(
-						for_buf,
-						name_range["start"].line - 1,
-						name_range["start"].character,
-						name_range["end"].line - 1,
-						name_range["end"].character,
-						{}
-					)
-				)
-			else
-				name = "Anon"
-			end
-
 			curr_parsed_symbol = {
-				name = name,
-				name_range = name_range,
+				name = val.name,
 				scope = scope,
 				kind = val.kind,
 				index = index,
@@ -78,7 +56,7 @@ local navic_symbols = {}
 local navic_context_data = {}
 
 local function update_data(for_buf, symbols)
-	navic_symbols[for_buf] = parse(symbols, for_buf)
+	navic_symbols[for_buf] = parse(symbols)
 end
 
 local function in_range(cursor_pos, range)
