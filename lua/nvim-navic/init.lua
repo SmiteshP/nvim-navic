@@ -9,7 +9,7 @@ local function request_symbol(for_buf, handler, client_id)
 		"textDocument/documentSymbol",
 		{ textDocument = vim.lsp.util.make_text_document_params() },
 		function(symbols)
-			if not symbols[client_id].error then
+			if not symbols[client_id].error and symbols[client_id].result ~= nil then
 				handler(for_buf, symbols[client_id].result)
 			end
 		end
