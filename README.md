@@ -85,7 +85,7 @@ navic.setup {
         Event         = " ",
         Operator      = " ",
         TypeParameter = " ",
-	},
+    },
     highlight = false,
     separator = " > ",
     depth_limit = 0,
@@ -120,13 +120,13 @@ table.insert(components.active[1], {
         return navic.is_available()
     end
 })
-  
+
 require("feline").setup({components = components})
 --  OR
 require("feline").winbar.setup({components = components})
 ```
 </details>
-  
+
 ### [lualine](https://github.com/nvim-lualine/lualine.nvim)
 
 <details>
