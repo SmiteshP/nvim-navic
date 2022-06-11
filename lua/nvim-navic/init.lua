@@ -225,8 +225,8 @@ local config = {
 		[26] = " ", -- TypeParameter
 	},
 	highlight = false,
-	seperator = " > ",
-	depth = 0,
+	separator = " > ",
+	depth_limit = 0,
 	depth_limit_indicator = "..",
 }
 
@@ -239,8 +239,8 @@ function M.setup(opts)
 		end
 	end
 
-	config.seperator = opts.seperator or config.seperator
-	config.depth = opts.depth or config.depth
+	config.separator = opts.separator or config.separator
+	config.depth_limit = opts.depth_limit or config.depth_limit
 	config.depth_limit_indicator = opts.depth_limit_indicator or config.depth_limit_indicator
 	config.highlight = opts.highlight or config.highlight
 end
@@ -290,7 +290,7 @@ function M.get_location()
 		end
 	end
 
-	if config.depth ~= 0 and #location > config.depth then
+	if config.depth_limit ~= 0 and #location > config.depth_limit then
 		location = vim.list_slice(location, #location - config.depth + 1, #location)
 		table.insert(location, 1, config.depth_limit_indicator)
 	end
