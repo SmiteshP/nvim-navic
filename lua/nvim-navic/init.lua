@@ -297,6 +297,14 @@ function M.attach(client, bufnr)
 		group = navic_augroup,
 		buffer = bufnr,
 	})
+	vim.api.nvim_create_autocmd({ "BufDelete" }, {
+		callback = function()
+			navic_context_data[bufnr] = nil
+			navic_symbols[bufnr] = nil
+		end,
+		group = navic_augroup,
+		buffer = bufnr,
+	})
 end
 
 return M
