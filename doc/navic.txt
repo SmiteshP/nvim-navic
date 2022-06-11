@@ -1,0 +1,194 @@
+*nvim-navic* *navic*
+
+A simple statusline/winbar component that shows you current code context.
+Named after the Indian satellite navigation system.
+
+Requires :
+*nvim-lspconfig* `https://github.com/neovim/nvim-lspconfig`
+*Neovim* 0.7 or above
+
+=============================================================================
+CONTENTS                                                     *navic-components*
+
+API                                                                 |navic-api|
+Usage                                                             |navic-usage|
+Customisation                                                 |navic-customise|
+Highlights                                                   |navic-highlights|
+
+=============================================================================
+API                                                                 *navic-api*
+
+*nvim-navic* provides the following functions for the user.
+
+*navic.setup* (opts)
+	Configure *nvim-navic*|'s options. See more *navic-configuration*
+
+*navic.attach* (client, bufnr)
+	Used to attach *nvim-navic* to lsp server. Pass this function as
+	on_attach while setting up your desired lsp server.
+
+*navic.is_available* ()
+	Returns boolean value indicating whether *nvim-navic* is able to provide
+	output for current buffer.
+
+*navic.get_location* ()
+	Returns a pretty string that shows code context and can be used directly
+	in statusline or winbar
+
+*navic.get_data* ()
+	Returns a table of tables representing the current code context. Contains
+	information about the symbol's name and kind at each level. Different
+	types of kinds are defined on LSP's website.
+	`https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#symbolKind`
+
+=============================================================================
+Usage                                                             *navic-usage*
+
+*nvim-navic* needs to be attached to lsp servers of the buffer to work. Use the
+*navic.attach* function while setting up lsp servers.
+
+NOTE: You can attach to only one lsp server per buffer.
+
+Example: >
+	require("lspconfig").clangd.setup {
+		on_attach = function(client, bufnr)
+			navic.attach(client, bufnr)
+		end
+	}
+<
+
+Next you can use *nvim-navic* in your statusline or winbar with your
+favorite statusline/winbar plugins.
+
+Example setup with feline.nvim `https://github.com/feline-nvim/feline.nvim`:
+
+Statusline: >
+	local navic = require("nvim-navic")
+
+	local components = {
+		active = {{}, {}, {}},
+	}
+
+	table.insert(components.active[1], {
+		provider = function()
+			return navic.get_location()
+		end,
+		enabled = function() return navic.is_available() end,
+	})
+
+	require("feline").setup({
+		components = components
+	})
+<
+
+Winbar: >
+	local navic = require("nvim-navic")
+
+	local components = {
+		active = {{}, {}, {}},
+	}
+
+	table.insert(components.active[1], {
+		provider = function()
+			return navic.get_location()
+		end,
+		enabled = function() return navic.is_available() end,
+	})
+
+	require("feline").winbar.setup({
+		components = components
+	})
+<
+
+=============================================================================
+Customisation                                                 *navic-customise*
+
+Use *navic.setup* to override any of the default options
+
+	icons: table
+		Icons to show for captured symbols. Default icons assume that you
+		have nerd-font.
+
+	separator: string
+		Icon to be used to separate two symbols.
+
+	depth: integer
+		Maximum depth of context to be showed. If the context depth exceeds
+		this parameter, context information is truncated. default is infinite
+
+	depth_limit_indicator: string
+		Indicator signifing that displayed string is truncated.
+
+Defaults >
+	navic.setup {
+		icons = {
+			File          = " ",
+			Module        = " ",
+			Namespace     = " ",
+			Package       = " ",
+			Class         = " ",
+			Method        = " ",
+			Property      = " ",
+			Field         = " ",
+			Constructor   = " ",
+			Enum          = "練",
+			Interface     = "練",
+			Function      = " ",
+			Variable      = " ",
+			Constant      = " ",
+			String        = " ",
+			Number        = " ",
+			Boolean       = "◩ ",
+			Array         = " ",
+			Object        = " ",
+			Key           = " ",
+			Null          = "ﳠ ",
+			EnumMember    = " ",
+			Struct        = " ",
+			Event         = " ",
+			Operator      = " ",
+			TypeParameter = " ",
+		},
+		highlight = false,
+		separator = " > ",
+		depth_limit = 0,
+		depth_limit_indicator = "..",
+	}
+<
+
+=============================================================================
+Highlight                                                    *navic-highlights*
+
+*nvim-navic* provides the following highlights which get used when highlight
+option is set to `true`.
+
+	*NavicIconsFile*
+	*NavicIconsModule*
+	*NavicIconsNamespace*
+	*NavicIconsPackage*
+	*NavicIconsClass*
+	*NavicIconsMethod*
+	*NavicIconsProperty*
+	*NavicIconsField*
+	*NavicIconsConstructor*
+	*NavicIconsEnum*
+	*NavicIconsInterface*
+	*NavicIconsFunction*
+	*NavicIconsVariable*
+	*NavicIconsConstant*
+	*NavicIconsString*
+	*NavicIconsNumber*
+	*NavicIconsBoolean*
+	*NavicIconsArray*
+	*NavicIconsObject*
+	*NavicIconsKey*
+	*NavicIconsNull*
+	*NavicIconsEnumMember*
+	*NavicIconsStruct*
+	*NavicIconsEvent*
+	*NavicIconsOperator*
+	*NavicIconsTypeParameter*
+	*NavicText*
+
+=============================================================================
+vim:tw=78:ts=4:ft=help:norl:
