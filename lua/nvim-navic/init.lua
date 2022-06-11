@@ -295,7 +295,7 @@ function M.get_location()
 		table.insert(location, 1, config.depth_limit_indicator)
 	end
 
-	return table.concat(location, config.seperator)
+	return table.concat(location, config.separator)
 end
 
 function M.attach(client, bufnr)
