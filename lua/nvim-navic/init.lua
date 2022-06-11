@@ -204,7 +204,7 @@ function M.setup(opts)
 
 	if opts.icons ~= nil then
 		for k, v in pairs(opts.icons) do
-			config[lsp_mapping[k]] = v
+			config.icons[lsp_str_to_num[k]] = v
 		end
 	end
 
