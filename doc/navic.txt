@@ -1,6 +1,6 @@
 *nvim-navic* *navic*
 
-A simple statusline/winbar component that shows you current code context.
+A simple statusline/winbar component that shows your current code context.
 Named after the Indian satellite navigation system.
 
 Requires :
@@ -113,7 +113,7 @@ Use *navic.setup* to override any of the default options
 		Icon to be used to separate two symbols.
 
 	depth: integer
-		Maximum depth of context to be showed. If the context depth exceeds
+		Maximum depth of context to be shown. If the context depth exceeds
 		this parameter, context information is truncated. default is infinite
 
 	depth_limit_indicator: string
