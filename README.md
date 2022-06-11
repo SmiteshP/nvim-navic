@@ -133,12 +133,12 @@ require("feline").winbar.setup({components = components})
 <summary>An example lualine setup </summary>
 
 ```lua
-local gps = require("nvim-gps")
+local navic = require("nvim-navic")
 
 require("lualine").setup({
     sections = {
         lualine_c = {
-            { gps.get_location, cond = gps.is_available },
+            { navic.get_location, cond = navic.is_available },
         }
     }
 })
