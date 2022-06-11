@@ -135,6 +135,66 @@ local function update_context(for_buf)
 	navic_context_data[for_buf] = new_context_data
 end
 
+-- stylua: ignore
+local lsp_str_to_num = {
+	File          = 1,
+	Module        = 2,
+	Namespace     = 3,
+	Package       = 4,
+	Class         = 5,
+	Method        = 6,
+	Property      = 7,
+	Field         = 8,
+	Constructor   = 9,
+	Enum          = 10,
+	Interface     = 11,
+	Function      = 12,
+	Variable      = 13,
+	Constant      = 14,
+	String        = 15,
+	Number        = 16,
+	Boolean       = 17,
+	Array         = 18,
+	Object        = 19,
+	Key           = 20,
+	Null          = 21,
+	EnumMember    = 22,
+	Struct        = 23,
+	Event         = 24,
+	Operator      = 25,
+	TypeParameter = 26,
+}
+
+-- stylua: ignore
+local lsp_num_to_str = {
+	[1]  = "File",
+	[2]  = "Module",
+	[3]  = "Namespace",
+	[4]  = "Package",
+	[5]  = "Class",
+	[6]  = "Method",
+	[7]  = "Property",
+	[8]  = "Field",
+	[9]  = "Constructor",
+	[10] = "Enum",
+	[11] = "Interface",
+	[12] = "Function",
+	[13] = "Variable",
+	[14] = "Constant",
+	[15] = "String",
+	[16] = "Number",
+	[17] = "Boolean",
+	[18] = "Array",
+	[19] = "Object",
+	[20] = "Key",
+	[21] = "Null",
+	[22] = "EnumMember",
+	[23] = "Struct",
+	[24] = "Event",
+	[25] = "Operator",
+	[26] = "TypeParameter",
+}
+
 local config = {
 	icons = {
 		[1] = " ", -- File
@@ -164,6 +224,7 @@ local config = {
 		[25] = " ", -- Operator
 		[26] = " ", -- TypeParameter
 	},
+	highlight = false,
 	seperator = " > ",
 	depth = 0,
 	depth_limit_indicator = "..",
@@ -172,36 +233,6 @@ local config = {
 -- @Public Methods
 
 function M.setup(opts)
-	-- stylua: ignore
-	local lsp_mapping = {
-		File          = 1,
-		Module        = 2,
-		Namespace     = 3,
-		Package       = 4,
-		Class         = 5,
-		Method        = 6,
-		Property      = 7,
-		Field         = 8,
-		Constructor   = 9,
-		Enum          = 10,
-		Interface     = 11,
-		Function      = 12,
-		Variable      = 13,
-		Constant      = 14,
-		String        = 15,
-		Number        = 16,
-		Boolean       = 17,
-		Array         = 18,
-		Object        = 19,
-		Key           = 20,
-		Null          = 21,
-		EnumMember    = 22,
-		Struct        = 23,
-		Event         = 24,
-		Operator      = 25,
-		TypeParameter = 26,
-	}
-
 	if opts.icons ~= nil then
 		for k, v in pairs(opts.icons) do
 			config.icons[lsp_str_to_num[k]] = v
@@ -211,6 +242,7 @@ function M.setup(opts)
 	config.seperator = opts.seperator or config.seperator
 	config.depth = opts.depth or config.depth
 	config.depth_limit_indicator = opts.depth_limit_indicator or config.depth_limit_indicator
+	config.highlight = opts.highlight or config.highlight
 end
 
 -- returns table of context or nil
@@ -246,8 +278,16 @@ function M.get_location()
 
 	local location = {}
 
+	local function add_hl(kind, name)
+		return "%#NavicIcons" .. lsp_num_to_str[kind] .. "#" .. config.icons[kind] .. "%*%#NavicText#" .. name .. "%*"
+	end
+
 	for _, v in ipairs(data) do
-		table.insert(location, config.icons[v.kind] .. v.name)
+		if config.highlight then
+			table.insert(location, add_hl(v.kind, v.name))
+		else
+			table.insert(location, config.icons[v.kind] .. v.name)
+		end
 	end
 
 	if config.depth ~= 0 and #location > config.depth then
