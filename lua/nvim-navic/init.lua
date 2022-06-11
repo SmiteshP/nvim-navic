@@ -295,7 +295,15 @@ function M.get_location()
 		table.insert(location, 1, config.depth_limit_indicator)
 	end
 
-	return table.concat(location, config.separator)
+	local ret = ""
+
+	if config.highlight then
+		ret = table.concat(location, "%#NavicText#"..config.separator.."%*")
+	else
+		ret = table.concat(location, config.separator)
+	end
+
+	return ret
 end
 
 function M.attach(client, bufnr)
