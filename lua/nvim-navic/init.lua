@@ -275,7 +275,9 @@ function M.get_data()
 	for _, v in ipairs(context_data) do
 		table.insert(ret, {
 			kind = v.kind,
+			type = lsp_num_to_str[v.kind],
 			name = v.name,
+			icon = config.icons[v.kind]
 		})
 	end
 
@@ -303,7 +305,7 @@ function M.get_location()
 		if config.highlight then
 			table.insert(location, add_hl(v.kind, v.name))
 		else
-			table.insert(location, config.icons[v.kind] .. v.name)
+			table.insert(location, v.icon .. v.name)
 		end
 	end
 

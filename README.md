@@ -159,10 +159,14 @@ If you have a creative use case and want the raw context data to work with, you 
  {
     {
         name = "myclass",
+		type = "Class",
+		icon = " ",
         kind = 5
     },
     {
         name = "mymethod",
+		type = "Method",
+		icon = " ",
         kind = 6
     }
  }
