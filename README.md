@@ -94,6 +94,44 @@ navic.setup {
 
 ```
 
+For highlights to work, highlight groups must be defined. These may be defined in your colourscheme, if not you can define them yourself too as shown in below code snippet.
+
+<details>
+<summary>Example highlight definitions</summary>
+	
+```lua
+vim.api.nvim_set_hl(0, "NavicFile", {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicModule", {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicNamespace", {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicPackage", {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicClass", {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicMethod", {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicProperty", {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicField", {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicConstructor", {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicEnum", {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicInterface", {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicFunction", {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicVariable", {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicConstant", {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicString", {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicNumber", {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicBoolean", {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicArray", {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicObject", {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicKey", {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicNull", {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicEnumMember", {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicStruct", {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicEvent", {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicOperator", {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicTypeParameter", {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicText", {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicSeparator", {default = true, bg = "#000000", fg = "#ffffff"})
+```
+</details>
+
+
 ## 🚀 Usage
 
 nvim-navic does not alter your statusline or winbar on its own. Instead, you are provided with these two functions and its left up to you how you want to incorporate this into your setup.
