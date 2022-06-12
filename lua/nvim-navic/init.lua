@@ -250,7 +250,9 @@ local config = {
 function M.setup(opts)
 	if opts.icons ~= nil then
 		for k, v in pairs(opts.icons) do
-			config.icons[lsp_str_to_num[k]] = v
+			if lsp_str_to_num[k] then
+				config.icons[lsp_str_to_num[k]] = v
+			end
 		end
 	end
 
