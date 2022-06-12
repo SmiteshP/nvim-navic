@@ -189,6 +189,7 @@ option is set to `true`.
 	*NavicIconsOperator*
 	*NavicIconsTypeParameter*
 	*NavicText*
+	*NavicSeparator*
 
 =============================================================================
 vim:tw=78:ts=4:ft=help:norl:

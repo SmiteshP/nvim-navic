@@ -52,7 +52,7 @@ require("lspconfig").clangd.setup {
 Use the `setup` function to modify default parameters.
 
 * `icons` : Indicate the type of symbol captured. Default icons assume you have nerd-fonts.
-* `highlight` : If set to true, will add colors to icons and text as defined by highlight groups `NavicIcons*` (`NavicIconsFile`, `NavicIconsModule`.. etc.) and `NavicText`.
+* `highlight` : If set to true, will add colors to icons and text as defined by highlight groups `NavicIcons*` (`NavicIconsFile`, `NavicIconsModule`.. etc.), `NavicText` and `NavicSeparator`.
 * `depth_limit` : Maximum depth of context to be shown. If the context hits this depth limit, it is truncated.
 * `depth_limit_indicatior` : Icon to indicate that `depth_limit` was hit and the shown context is truncated.
 
