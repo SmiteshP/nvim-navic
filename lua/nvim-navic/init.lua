@@ -26,6 +26,21 @@ local function parse(symbols)
 		for index, val in ipairs(curr_symbol) do
 			local curr_parsed_symbol = {}
 
+			-- SymbolInformation detection
+			if val.range == nil then
+				vim.notify(
+					'nvim-navic: Server "'
+						.. vim.lsp.get_client_by_id(vim.b.navic_client_id).name
+						.. '" does not support documentSymbols, it is responds with SymbolInformation format which has been deprecated in latest LSP specification.',
+					vim.log.levels.ERROR
+				)
+				vim.api.nvim_clear_autocmds({
+					buffer = vim.api.nvim_win_get_buf(0),
+					group = "navic",
+				})
+				return
+			end
+
 			local scope = val.range
 			scope["start"].line = scope["start"].line + 1
 			scope["end"].line = scope["end"].line + 1
@@ -298,7 +313,7 @@ function M.get_location()
 	local ret = ""
 
 	if config.highlight then
-		ret = table.concat(location, "%#NavicText#"..config.separator.."%*")
+		ret = table.concat(location, "%#NavicText#" .. config.separator .. "%*")
 	else
 		ret = table.concat(location, config.separator)
 	end
@@ -308,7 +323,7 @@ end
 
 function M.attach(client, bufnr)
 	if not client.server_capabilities.documentSymbolProvider then
-		vim.notify("nvim-navic: Server " .. client.name .. " does not support documentSymbols", vim.log.levels.ERROR)
+		vim.notify('nvim-navic: Server "' .. client.name .. '" does not support documentSymbols.', vim.log.levels.ERROR)
 		return
 	end
 
