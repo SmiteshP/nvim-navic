@@ -308,7 +308,6 @@ end
 
 function M.attach(client, bufnr)
 	if not client.server_capabilities.documentSymbolProvider then
-		vim.notify("nvim-navic: Server " .. client.name .. " does not support documentSymbols", vim.log.levels.ERROR)
 		return
 	end
 
