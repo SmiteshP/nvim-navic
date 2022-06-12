@@ -331,7 +331,7 @@ function M.attach(client, bufnr)
 		return
 	end
 
-	if vim.b.navic_client_id ~= nil then
+	if vim.b.navic_client_id ~= nil and vim.b.navic_client_name ~= client.name then
 		local prev_client = vim.lsp.get_client_by_id(client.id)
 		vim.notify(
 			"nvim-navic: Failed to attach to "
@@ -344,6 +344,7 @@ function M.attach(client, bufnr)
 	end
 
 	vim.b.navic_client_id = client.id
+	vim.b.navic_client_name = client.name
 
 	local navic_augroup = vim.api.nvim_create_augroup("navic", { clear = false })
 	vim.api.nvim_clear_autocmds({
