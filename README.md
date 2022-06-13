@@ -100,34 +100,34 @@ For highlights to work, highlight groups must be defined. These may be defined i
 <summary>Example highlight definitions</summary>
 	
 ```lua
-vim.api.nvim_set_hl(0, "NavicFile", {default = true, bg = "#000000", fg = "#ffffff"})
-vim.api.nvim_set_hl(0, "NavicModule", {default = true, bg = "#000000", fg = "#ffffff"})
-vim.api.nvim_set_hl(0, "NavicNamespace", {default = true, bg = "#000000", fg = "#ffffff"})
-vim.api.nvim_set_hl(0, "NavicPackage", {default = true, bg = "#000000", fg = "#ffffff"})
-vim.api.nvim_set_hl(0, "NavicClass", {default = true, bg = "#000000", fg = "#ffffff"})
-vim.api.nvim_set_hl(0, "NavicMethod", {default = true, bg = "#000000", fg = "#ffffff"})
-vim.api.nvim_set_hl(0, "NavicProperty", {default = true, bg = "#000000", fg = "#ffffff"})
-vim.api.nvim_set_hl(0, "NavicField", {default = true, bg = "#000000", fg = "#ffffff"})
-vim.api.nvim_set_hl(0, "NavicConstructor", {default = true, bg = "#000000", fg = "#ffffff"})
-vim.api.nvim_set_hl(0, "NavicEnum", {default = true, bg = "#000000", fg = "#ffffff"})
-vim.api.nvim_set_hl(0, "NavicInterface", {default = true, bg = "#000000", fg = "#ffffff"})
-vim.api.nvim_set_hl(0, "NavicFunction", {default = true, bg = "#000000", fg = "#ffffff"})
-vim.api.nvim_set_hl(0, "NavicVariable", {default = true, bg = "#000000", fg = "#ffffff"})
-vim.api.nvim_set_hl(0, "NavicConstant", {default = true, bg = "#000000", fg = "#ffffff"})
-vim.api.nvim_set_hl(0, "NavicString", {default = true, bg = "#000000", fg = "#ffffff"})
-vim.api.nvim_set_hl(0, "NavicNumber", {default = true, bg = "#000000", fg = "#ffffff"})
-vim.api.nvim_set_hl(0, "NavicBoolean", {default = true, bg = "#000000", fg = "#ffffff"})
-vim.api.nvim_set_hl(0, "NavicArray", {default = true, bg = "#000000", fg = "#ffffff"})
-vim.api.nvim_set_hl(0, "NavicObject", {default = true, bg = "#000000", fg = "#ffffff"})
-vim.api.nvim_set_hl(0, "NavicKey", {default = true, bg = "#000000", fg = "#ffffff"})
-vim.api.nvim_set_hl(0, "NavicNull", {default = true, bg = "#000000", fg = "#ffffff"})
-vim.api.nvim_set_hl(0, "NavicEnumMember", {default = true, bg = "#000000", fg = "#ffffff"})
-vim.api.nvim_set_hl(0, "NavicStruct", {default = true, bg = "#000000", fg = "#ffffff"})
-vim.api.nvim_set_hl(0, "NavicEvent", {default = true, bg = "#000000", fg = "#ffffff"})
-vim.api.nvim_set_hl(0, "NavicOperator", {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicFile",          {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicModule",        {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicNamespace",     {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicPackage",       {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicClass",         {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicMethod",        {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicProperty",      {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicField",         {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicConstructor",   {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicEnum",          {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicInterface",     {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicFunction",      {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicVariable",      {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicConstant",      {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicString",        {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicNumber",        {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicBoolean",       {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicArray",         {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicObject",        {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicKey",           {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicNull",          {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicEnumMember",    {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicStruct",        {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicEvent",         {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicOperator",      {default = true, bg = "#000000", fg = "#ffffff"})
 vim.api.nvim_set_hl(0, "NavicTypeParameter", {default = true, bg = "#000000", fg = "#ffffff"})
-vim.api.nvim_set_hl(0, "NavicText", {default = true, bg = "#000000", fg = "#ffffff"})
-vim.api.nvim_set_hl(0, "NavicSeparator", {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicText",          {default = true, bg = "#000000", fg = "#ffffff"})
+vim.api.nvim_set_hl(0, "NavicSeparator",     {default = true, bg = "#000000", fg = "#ffffff"})
 ```
 </details>
 
@@ -188,7 +188,7 @@ require("lualine").setup({
 
 If you have a creative use case and want the raw context data to work with, you can use the following function
 
-* `get_data()` : Returns a table of intermediate representation of data. Table of tables that contain 'kind' and 'name' for each context.
+* `get_data()` : Returns a table of intermediate representation of data. Table of tables that contain 'kind', 'name' and 'icon' for each context.
 
 <details>
 <summary>An example output of <code>get_data</code> function: </summary>
@@ -197,14 +197,14 @@ If you have a creative use case and want the raw context data to work with, you 
  {
     {
         name = "myclass",
-		type = "Class",
-		icon = " ",
+        type = "Class",
+        icon = " ",
         kind = 5
     },
     {
         name = "mymethod",
-		type = "Method",
-		icon = " ",
+        type = "Method",
+        icon = " ",
         kind = 6
     }
  }
