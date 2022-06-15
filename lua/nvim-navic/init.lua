@@ -31,7 +31,7 @@ local function parse(symbols)
 				vim.notify(
 					'nvim-navic: Server "'
 						.. vim.lsp.get_client_by_id(vim.b.navic_client_id).name
-						.. '" does not support documentSymbols, it is responds with SymbolInformation format which has been deprecated in latest LSP specification.',
+						.. '" does not support documentSymbols, it responds with SymbolInformation format which has been deprecated in latest LSP specification.',
 					vim.log.levels.ERROR
 				)
 				vim.api.nvim_clear_autocmds({
