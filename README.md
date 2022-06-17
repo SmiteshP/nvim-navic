@@ -98,8 +98,8 @@ navic.setup {
 
 nvim-navic does not alter your statusline or winbar on its own. Instead, you are provided with these two functions and its left up to you how you want to incorporate this into your setup.
 
-* `is_available()` : Returns boolean value indicating whether output can be provided.
-* `get_location()` : Returns a pretty string with context information.
+* `is_available()`     : Returns boolean value indicating whether output can be provided.
+* `get_location(opts)` : Returns a pretty string with context information. Using `opts` table you can override any of the options, format same as the table for `setup` function.
 
 <details>
 <summary>Examples</summary>
