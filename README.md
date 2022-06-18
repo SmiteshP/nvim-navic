@@ -183,6 +183,32 @@ require("lualine").setup({
 ```
 
 </details>
+	
+### [galaxyline](https://github.com/glepnir/galaxyline.nvim)
+
+<details>
+<summary>An example galaxyline setup </summary>
+
+```lua
+local navic = require("nvim-navic")
+local gl = require("galaxyline")
+local condition = require("galaxyline.condition")
+
+
+gl.section.right[1]= {
+    nvimNavic = {
+        provider = function()
+            return navic.get_location()
+        end,
+        condition = function()
+            return navic.is_available()
+        end
+    }
+}
+
+```
+
+</details>
 
 </details>
 
