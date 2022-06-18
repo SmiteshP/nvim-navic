@@ -256,10 +256,10 @@ function M.setup(opts)
 		end
 	end
 
-	config.separator = opts.separator or config.separator
-	config.depth_limit = opts.depth_limit or config.depth_limit
-	config.depth_limit_indicator = opts.depth_limit_indicator or config.depth_limit_indicator
-	config.highlight = opts.highlight or config.highlight
+	if opts.separator ~= nil then config.separator = opts.separator end
+	if opts.depth_limit ~= nil then config.depth_limit = opts.depth_limit end
+	if opts.depth_limit_indicator ~= nil then config.depth_limit_indicator = opts.depth_limit_indicator end
+	if opts.highlight ~= nil then config.highlight = opts.highlight end
 end
 
 -- returns table of context or nil
@@ -288,7 +288,28 @@ function M.is_available()
 	return vim.b.navic_client_id ~= nil
 end
 
-function M.get_location()
+function M.get_location(opts)
+	local local_config = {}
+
+	if opts ~= nil then
+		local_config = vim.deepcopy(config)
+
+		if opts.icons ~= nil then
+			for k, v in pairs(opts.icons) do
+				if lsp_str_to_num[k] then
+					local_config.icons[lsp_str_to_num[k]] = v
+				end
+			end
+		end
+
+		if opts.separator ~= nil then local_config.separator = opts.separator end
+		if opts.depth_limit ~= nil then local_config.depth_limit = opts.depth_limit end
+		if opts.depth_limit_indicator ~= nil then local_config.depth_limit_indicator = opts.depth_limit_indicator end
+		if opts.highlight ~= nil then local_config.highlight = opts.highlight end
+	else
+		local_config = config
+	end
+
 	local data = M.get_data()
 
 	if data == nil then
@@ -298,32 +319,32 @@ function M.get_location()
 	local location = {}
 
 	local function add_hl(kind, name)
-		return "%#NavicIcons" .. lsp_num_to_str[kind] .. "#" .. config.icons[kind] .. "%*%#NavicText#" .. name .. "%*"
+		return "%#NavicIcons" .. lsp_num_to_str[kind] .. "#" .. local_config.icons[kind] .. "%*%#NavicText#" .. name .. "%*"
 	end
 
 	for _, v in ipairs(data) do
-		if config.highlight then
+		if local_config.highlight then
 			table.insert(location, add_hl(v.kind, v.name))
 		else
 			table.insert(location, v.icon .. v.name)
 		end
 	end
 
-	if config.depth_limit ~= 0 and #location > config.depth_limit then
-		location = vim.list_slice(location, #location - config.depth_limit + 1, #location)
-		if config.highlight then
-			table.insert(location, 1, "%#NavicSeparator#" .. config.depth_limit_indicator .. "%*")
+	if local_config.depth_limit ~= 0 and #location > local_config.depth_limit then
+		location = vim.list_slice(location, #location - local_config.depth_limit + 1, #location)
+		if local_config.highlight then
+			table.insert(location, 1, "%#NavicSeparator#" .. local_config.depth_limit_indicator .. "%*")
 		else
-			table.insert(location, 1, config.depth_limit_indicator)
+			table.insert(location, 1, local_config.depth_limit_indicator)
 		end
 	end
 
 	local ret = ""
 
-	if config.highlight then
-		ret = table.concat(location, "%#NavicSeparator#" .. config.separator .. "%*")
+	if local_config.highlight then
+		ret = table.concat(location, "%#NavicSeparator#" .. local_config.separator .. "%*")
 	else
-		ret = table.concat(location, config.separator)
+		ret = table.concat(location, local_config.separator)
 	end
 
 	return ret
