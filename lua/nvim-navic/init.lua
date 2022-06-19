@@ -264,11 +264,11 @@ function M.setup(opts)
 		end
 	end
 
-	config.separator = opts.separator or config.separator
-	config.depth_limit = opts.depth_limit or config.depth_limit
-	config.depth_limit_indicator = opts.depth_limit_indicator or config.depth_limit_indicator
-	config.highlight = opts.highlight or config.highlight
-	config.log_level = opts.log_level or config.log_level
+	if opts.separator ~= nil then config.separator = opts.separator end
+	if opts.depth_limit ~= nil then config.depth_limit = opts.depth_limit end
+	if opts.depth_limit_indicator ~= nil then config.depth_limit_indicator = opts.depth_limit_indicator end
+	if opts.highlight ~= nil then config.highlight = opts.highlight end
+	if opts.log_level ~= nil then config.log_level = opts.log_level end
 end
 
 -- returns table of context or nil
