@@ -205,7 +205,6 @@ gl.section.right[1]= {
         end
     }
 }
-
 ```
 
 </details>
