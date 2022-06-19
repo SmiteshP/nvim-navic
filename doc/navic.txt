@@ -21,7 +21,7 @@ API                                                                 *navic-api*
 *nvim-navic* provides the following functions for the user.
 
 *navic.setup* (opts)
-	Configure *nvim-navic*|'s options. See more *navic-configuration*
+	Configure *nvim-navic*|'s options. See more *navic-configuration*.
 
 *navic.attach* (client, bufnr)
 	Used to attach *nvim-navic* to lsp server. Pass this function as
@@ -31,9 +31,11 @@ API                                                                 *navic-api*
 	Returns boolean value indicating whether *nvim-navic* is able to provide
 	output for current buffer.
 
-*navic.get_location* ()
+*navic.get_location* (opts)
 	Returns a pretty string that shows code context and can be used directly
-	in statusline or winbar
+	in statusline or winbar.
+	opts table can be passed to override any of *nvim-navic*|'s options.
+	Follows same table format as *navic-setup*|'s opts table.
 
 *navic.get_data* ()
 	Returns a table of tables representing the current code context. Contains
