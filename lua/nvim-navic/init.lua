@@ -1,6 +1,49 @@
 local M = {}
 
 -- @Private Methods
+local config = {
+	icons = {
+		[1] = " ", -- File
+		[2] = " ", -- Module
+		[3] = " ", -- Namespace
+		[4] = " ", -- Package
+		[5] = " ", -- Class
+		[6] = " ", -- Method
+		[7] = " ", -- Property
+		[8] = " ", -- Field
+		[9] = " ", -- Constructor
+		[10] = "練", -- Enum
+		[11] = "練", -- Interface
+		[12] = " ", -- Function
+		[13] = " ", -- Variable
+		[14] = " ", -- Constant
+		[15] = " ", -- String
+		[16] = " ", -- Number
+		[17] = "◩ ", -- Boolean
+		[18] = " ", -- Array
+		[19] = " ", -- Object
+		[20] = " ", -- Key
+		[21] = "ﳠ ", -- Null
+		[22] = " ", -- EnumMember
+		[23] = " ", -- Struct
+		[24] = " ", -- Event
+		[25] = " ", -- Operator
+		[26] = " ", -- TypeParameter
+	},
+	highlight = false,
+	separator = " > ",
+	depth_limit = 0,
+	depth_limit_indicator = "..",
+	log_level = vim.log.levels.TRACE,
+}
+
+local function log(text, log_level)
+	if (config.log_level == -1) then return end
+
+	if (log_level >= config.log_level) then
+		vim.notify(text, log_level)
+	end
+end
 
 -- Make request to lsp server
 local function request_symbol(for_buf, handler, client_id)
@@ -28,7 +71,7 @@ local function parse(symbols)
 
 			-- SymbolInformation detection
 			if val.range == nil then
-				vim.notify(
+				log(
 					'nvim-navic: Server "'
 						.. vim.lsp.get_client_by_id(vim.b.navic_client_id).name
 						.. '" does not support documentSymbols, it is responds with SymbolInformation format which has been deprecated in latest LSP specification.',
@@ -210,41 +253,6 @@ local lsp_num_to_str = {
 	[26] = "TypeParameter",
 }
 
-local config = {
-	icons = {
-		[1] = " ", -- File
-		[2] = " ", -- Module
-		[3] = " ", -- Namespace
-		[4] = " ", -- Package
-		[5] = " ", -- Class
-		[6] = " ", -- Method
-		[7] = " ", -- Property
-		[8] = " ", -- Field
-		[9] = " ", -- Constructor
-		[10] = "練", -- Enum
-		[11] = "練", -- Interface
-		[12] = " ", -- Function
-		[13] = " ", -- Variable
-		[14] = " ", -- Constant
-		[15] = " ", -- String
-		[16] = " ", -- Number
-		[17] = "◩ ", -- Boolean
-		[18] = " ", -- Array
-		[19] = " ", -- Object
-		[20] = " ", -- Key
-		[21] = "ﳠ ", -- Null
-		[22] = " ", -- EnumMember
-		[23] = " ", -- Struct
-		[24] = " ", -- Event
-		[25] = " ", -- Operator
-		[26] = " ", -- TypeParameter
-	},
-	highlight = false,
-	separator = " > ",
-	depth_limit = 0,
-	depth_limit_indicator = "..",
-}
-
 -- @Public Methods
 
 function M.setup(opts)
@@ -260,6 +268,7 @@ function M.setup(opts)
 	config.depth_limit = opts.depth_limit or config.depth_limit
 	config.depth_limit_indicator = opts.depth_limit_indicator or config.depth_limit_indicator
 	config.highlight = opts.highlight or config.highlight
+	config.log_level = opts.log_level or config.log_level
 end
 
 -- returns table of context or nil
@@ -331,13 +340,13 @@ end
 
 function M.attach(client, bufnr)
 	if not client.server_capabilities.documentSymbolProvider then
-		vim.notify('nvim-navic: Server "' .. client.name .. '" does not support documentSymbols.', vim.log.levels.ERROR)
+		log('nvim-navic: Server "' .. client.name .. '" does not support documentSymbols.', vim.log.levels.ERROR)
 		return
 	end
 
 	if vim.b.navic_client_id ~= nil and vim.b.navic_client_name ~= client.name then
 		local prev_client = vim.lsp.get_client_by_id(client.id)
-		vim.notify(
+		log(
 			"nvim-navic: Failed to attach to "
 				.. client.name
 				.. " for current buffer. Already attached to "

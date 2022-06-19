@@ -119,6 +119,9 @@ Use *navic.setup* to override any of the default options
 	depth_limit_indicator: string
 		Indicator signifing that displayed string is truncated.
 
+    log_level: number
+        Maximum log level to log (vim.log.levels), -1 to disable logging.
+
 Defaults >
 	navic.setup {
 		icons = {
@@ -153,6 +156,7 @@ Defaults >
 		separator = " > ",
 		depth_limit = 0,
 		depth_limit_indicator = "..",
+        log_level = vim.log.levels.TRACE,
 	}
 <
 
