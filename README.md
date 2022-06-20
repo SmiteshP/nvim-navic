@@ -192,7 +192,6 @@ require("lualine").setup({
 ```lua
 local navic = require("nvim-navic")
 local gl = require("galaxyline")
-local condition = require("galaxyline.condition")
 
 gl.section.right[1]= {
     nvimNavic = {
