@@ -59,6 +59,14 @@ local function parse(symbols)
 			ret[#ret + 1] = curr_parsed_symbol
 		end
 
+		if ret then table.sort(ret, function(a, b)
+			if b.scope.start.line == a.scope.start.line then
+				return b.scope.start.character > a.scope.start.character
+			end
+			return b.scope.start.line > a.scope.start.line
+			end)
+		end
+
 		return ret
 	end
 
