@@ -28,12 +28,14 @@ local function parse(symbols)
 
 			-- SymbolInformation detection
 			if val.range == nil then
-				vim.notify(
-					'nvim-navic: Server "'
-						.. vim.lsp.get_client_by_id(vim.b.navic_client_id).name
-						.. '" does not support documentSymbols, it responds with SymbolInformation format which has been deprecated in latest LSP specification.',
-					vim.log.levels.ERROR
-				)
+				if not vim.g.navic_silence then
+					vim.notify(
+						'nvim-navic: Server "'
+							.. vim.lsp.get_client_by_id(vim.b.navic_client_id).name
+							.. '" does not support documentSymbols, it responds with SymbolInformation format which has been deprecated in latest LSP specification.',
+						vim.log.levels.ERROR
+					)
+				end
 				vim.api.nvim_clear_autocmds({
 					buffer = vim.api.nvim_win_get_buf(0),
 					group = "navic",
@@ -360,19 +362,23 @@ end
 
 function M.attach(client, bufnr)
 	if not client.server_capabilities.documentSymbolProvider then
-		vim.notify('nvim-navic: Server "' .. client.name .. '" does not support documentSymbols.', vim.log.levels.ERROR)
+		if not vim.g.navic_silence then
+			vim.notify('nvim-navic: Server "' .. client.name .. '" does not support documentSymbols.', vim.log.levels.ERROR)
+		end
 		return
 	end
 
 	if vim.b.navic_client_id ~= nil and vim.b.navic_client_name ~= client.name then
 		local prev_client = vim.lsp.get_client_by_id(client.id)
-		vim.notify(
-			"nvim-navic: Failed to attach to "
-				.. client.name
-				.. " for current buffer. Already attached to "
-				.. prev_client.name,
-			vim.log.levels.WARN
-		)
+		if not vim.g.navic_silence then
+			vim.notify(
+				"nvim-navic: Failed to attach to "
+					.. client.name
+					.. " for current buffer. Already attached to "
+					.. prev_client.name,
+				vim.log.levels.WARN
+			)
+		end
 		return
 	end
 

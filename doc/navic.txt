@@ -102,6 +102,13 @@ Winbar: >
 	})
 <
 
+You can silence warning/error messages thrown by *nvim-navic* by setting
+>
+	vim.g.navic_silence = true.
+<
+at the start of your config. However this is not advisable, the error
+messages indicate issues in your setup.
+
 =============================================================================
 Customisation                                                 *navic-customise*
 
