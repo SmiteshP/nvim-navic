@@ -61,11 +61,12 @@ local function parse(symbols)
 			ret[#ret + 1] = curr_parsed_symbol
 		end
 
-		if ret then table.sort(ret, function(a, b)
-			if b.scope.start.line == a.scope.start.line then
-				return b.scope.start.character > a.scope.start.character
-			end
-			return b.scope.start.line > a.scope.start.line
+		if ret then
+			table.sort(ret, function(a, b)
+				if b.scope.start.line == a.scope.start.line then
+					return b.scope.start.character > a.scope.start.character
+				end
+				return b.scope.start.line > a.scope.start.line
 			end)
 		end
 
@@ -266,10 +267,18 @@ function M.setup(opts)
 		end
 	end
 
-	if opts.separator ~= nil then config.separator = opts.separator end
-	if opts.depth_limit ~= nil then config.depth_limit = opts.depth_limit end
-	if opts.depth_limit_indicator ~= nil then config.depth_limit_indicator = opts.depth_limit_indicator end
-	if opts.highlight ~= nil then config.highlight = opts.highlight end
+	if opts.separator ~= nil then
+		config.separator = opts.separator
+	end
+	if opts.depth_limit ~= nil then
+		config.depth_limit = opts.depth_limit
+	end
+	if opts.depth_limit_indicator ~= nil then
+		config.depth_limit_indicator = opts.depth_limit_indicator
+	end
+	if opts.highlight ~= nil then
+		config.highlight = opts.highlight
+	end
 end
 
 -- returns table of context or nil
@@ -287,7 +296,7 @@ function M.get_data()
 			kind = v.kind,
 			type = lsp_num_to_str[v.kind],
 			name = v.name,
-			icon = config.icons[v.kind]
+			icon = config.icons[v.kind],
 		})
 	end
 
@@ -312,10 +321,18 @@ function M.get_location(opts)
 			end
 		end
 
-		if opts.separator ~= nil then local_config.separator = opts.separator end
-		if opts.depth_limit ~= nil then local_config.depth_limit = opts.depth_limit end
-		if opts.depth_limit_indicator ~= nil then local_config.depth_limit_indicator = opts.depth_limit_indicator end
-		if opts.highlight ~= nil then local_config.highlight = opts.highlight end
+		if opts.separator ~= nil then
+			local_config.separator = opts.separator
+		end
+		if opts.depth_limit ~= nil then
+			local_config.depth_limit = opts.depth_limit
+		end
+		if opts.depth_limit_indicator ~= nil then
+			local_config.depth_limit_indicator = opts.depth_limit_indicator
+		end
+		if opts.highlight ~= nil then
+			local_config.highlight = opts.highlight
+		end
 	else
 		local_config = config
 	end
@@ -329,7 +346,13 @@ function M.get_location(opts)
 	local location = {}
 
 	local function add_hl(kind, name)
-		return "%#NavicIcons" .. lsp_num_to_str[kind] .. "#" .. local_config.icons[kind] .. "%*%#NavicText#" .. name .. "%*"
+		return "%#NavicIcons"
+			.. lsp_num_to_str[kind]
+			.. "#"
+			.. local_config.icons[kind]
+			.. "%*%#NavicText#"
+			.. name
+			.. "%*"
 	end
 
 	for _, v in ipairs(data) do
@@ -363,7 +386,10 @@ end
 function M.attach(client, bufnr)
 	if not client.server_capabilities.documentSymbolProvider then
 		if not vim.g.navic_silence then
-			vim.notify('nvim-navic: Server "' .. client.name .. '" does not support documentSymbols.', vim.log.levels.ERROR)
+			vim.notify(
+				'nvim-navic: Server "' .. client.name .. '" does not support documentSymbols.',
+				vim.log.levels.ERROR
+			)
 		end
 		return
 	end
