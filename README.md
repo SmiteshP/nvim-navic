@@ -47,6 +47,8 @@ require("lspconfig").clangd.setup {
 }
 ```
 
+NOTE: You can set `vim.g.navic_silence = true` to supress error messages thrown by nvim-navic. However this is not recommended as the error messages indicate that there is problem in your setup.
+
 ## 🪄 Customise
 
 Use the `setup` function to modify default parameters.
