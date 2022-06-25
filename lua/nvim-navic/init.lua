@@ -259,6 +259,8 @@ local config = {
 -- @Public Methods
 
 function M.setup(opts)
+	if opts == nil then return end
+
 	if opts.icons ~= nil then
 		for k, v in pairs(opts.icons) do
 			if lsp_str_to_num[k] then
