@@ -18,23 +18,23 @@ Highlights                                                   |navic-highlights|
 =============================================================================
 API                                                                 *navic-api*
 
-*nvim-navic* provides the following functions for the user.
+|nvim-navic| provides the following functions for the user.
 
 *navic.setup* (opts)
-	Configure *nvim-navic*|'s options. See more *navic-configuration*.
+	Configure |nvim-navic|'s options. See more *navic-configuration*.
 
 *navic.attach* (client, bufnr)
-	Used to attach *nvim-navic* to lsp server. Pass this function as
+	Used to attach |nvim-navic| to lsp server. Pass this function as
 	on_attach while setting up your desired lsp server.
 
 *navic.is_available* ()
-	Returns boolean value indicating whether *nvim-navic* is able to provide
+	Returns boolean value indicating whether |nvim-navic| is able to provide
 	output for current buffer.
 
 *navic.get_location* (opts)
 	Returns a pretty string that shows code context and can be used directly
 	in statusline or winbar.
-	opts table can be passed to override any of *nvim-navic*|'s options.
+	opts table can be passed to override any of |nvim-navic|'s options.
 	Follows same table format as *navic-setup*|'s opts table.
 
 *navic.get_data* ()
@@ -46,8 +46,8 @@ API                                                                 *navic-api*
 =============================================================================
 Usage                                                             *navic-usage*
 
-*nvim-navic* needs to be attached to lsp servers of the buffer to work. Use the
-*navic.attach* function while setting up lsp servers.
+|nvim-navic| needs to be attached to lsp servers of the buffer to work. Use the
+|navic.attach| function while setting up lsp servers.
 
 NOTE: You can attach to only one lsp server per buffer.
 
@@ -59,7 +59,7 @@ Example: >
 	}
 <
 
-Next you can use *nvim-navic* in your statusline or winbar with your
+Next you can use |nvim-navic| in your statusline or winbar with your
 favorite statusline/winbar plugins.
 
 Example setup with feline.nvim `https://github.com/feline-nvim/feline.nvim`:
@@ -102,7 +102,7 @@ Winbar: >
 	})
 <
 
-You can silence warning/error messages thrown by *nvim-navic* by setting
+You can silence warning/error messages thrown by |nvim-navic| by setting
 >
 	vim.g.navic_silence = true.
 <
@@ -112,7 +112,7 @@ messages indicate issues in your setup.
 =============================================================================
 Customisation                                                 *navic-customise*
 
-Use *navic.setup* to override any of the default options
+Use |navic.setup| to override any of the default options
 
 	icons: table
 		Icons to show for captured symbols. Default icons assume that you
@@ -168,7 +168,7 @@ Defaults >
 =============================================================================
 Highlight                                                    *navic-highlights*
 
-*nvim-navic* provides the following highlights which get used when highlight
+|nvim-navic| provides the following highlights which get used when highlight
 option is set to `true`.
 
 	`NavicIconsFile`
