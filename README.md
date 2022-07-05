@@ -144,6 +144,28 @@ nvim-navic does not alter your statusline or winbar on its own. Instead, you are
 <details>
 <summary>Examples</summary>
 
+### Native method
+
+<details>
+<summary>Lua</summary>
+
+```lua
+vim.o.statusline = "%{%v:lua.require'nvim-navic'.get_location()%}"
+--  OR
+vim.o.winbar = "%{%v:lua.require'nvim-navic'.get_location()%}"
+```
+</details>
+
+<details>
+<summary>Vimscript</summary>
+
+```vim
+set statusline+=%{%v:lua.require'nvim-navic'.get_location()%}
+"   OR
+set winbar+=%{%v:lua.require'nvim-navic'.get_location()%}
+```
+</details>
+
 ### [feline](https://github.com/feline-nvim/feline.nvim)
 
 <details>
@@ -183,7 +205,6 @@ require("lualine").setup({
     }
 })
 ```
-
 </details>
 	
 ### [galaxyline](https://github.com/glepnir/galaxyline.nvim)
