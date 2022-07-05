@@ -133,7 +133,7 @@ vim.api.nvim_set_hl(0, "NavicSeparator",          {default = true, bg = "#000000
 ```
 </details>
 
-If you have a font patched with [codicons.ttf](https://github.com/microsoft/vscode-codicons/raw/main/dist/codicon.ttf), you can replicate the look of VSCode breadcrumbs using the following icons
+If you have a font patched with [codicon.ttf](https://github.com/microsoft/vscode-codicons/raw/main/dist/codicon.ttf), you can replicate the look of VSCode breadcrumbs using the following icons
 
 <details>
 <summary>VSCode like icons</summary>
