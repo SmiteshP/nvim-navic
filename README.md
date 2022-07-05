@@ -47,7 +47,7 @@ require("lspconfig").clangd.setup {
 }
 ```
 
-NOTE: You can set `vim.g.navic_silence = true` to supress error messages thrown by nvim-navic. However this is not recommended as the error messages indicate that there is problem in your setup.
+>NOTE: You can set `vim.g.navic_silence = true` to supress error messages thrown by nvim-navic. However this is not recommended as the error messages indicate that there is problem in your setup. That is, you are attaching nvim-navic to servers that don't support documentSymbol or are attaching navic to multiple servers for a single buffer.
 
 ## 🪄 Customise
 
@@ -133,6 +133,44 @@ vim.api.nvim_set_hl(0, "NavicSeparator",          {default = true, bg = "#000000
 ```
 </details>
 
+If you have a font patched with [codicons.ttf](https://github.com/microsoft/vscode-codicons/raw/main/dist/codicon.ttf), you can replicate the look of VSCode breadcrumbs using the following icons
+
+<details>
+<summary>VSCode like icons</summary>
+
+```lua
+navic.setup {
+  icons = {
+    File = ' ',
+    Module = ' ',
+    Namespace = ' ',
+    Package = ' ',
+    Class = ' ',
+    Method = ' ',
+    Property = ' ',
+    Field = ' ',
+    Constructor = ' ',
+    Enum = ' ',
+    Interface = ' ',
+    Function = ' ',
+    Variable = ' ',
+    Constant = ' ',
+    String = ' ',
+    Number = ' ',
+    Boolean = ' ',
+    Array = ' ',
+    Object = ' ',
+    Key = ' ',
+    Null = ' ',
+    EnumMember = ' ',
+    Struct = ' ',
+    Event = ' ',
+    Operator = ' ',
+    TypeParameter = ' '
+  }
+}
+```
+</details>
 
 ## 🚀 Usage
 
