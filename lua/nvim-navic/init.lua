@@ -9,7 +9,14 @@ local function request_symbol(for_buf, handler, client_id)
 		"textDocument/documentSymbol",
 		{ textDocument = vim.lsp.util.make_text_document_params() },
 		function(symbols)
-			if symbols[client_id] ~= nil and not symbols[client_id].error and symbols[client_id].result ~= nil then
+			if symbols[client_id] == nil then
+				return
+			elseif symbols[client_id].error then
+				vim.defer_fn(function()
+					request_symbol(for_buf, handler, client_id)
+				end, 750)
+			elseif symbols[client_id].result ~= nil then
+				vim.b[for_buf].navic_awaiting_lsp_response = false
 				handler(for_buf, symbols[client_id].result)
 			end
 		end
@@ -259,7 +266,9 @@ local config = {
 -- @Public Methods
 
 function M.setup(opts)
-	if opts == nil then return end
+	if opts == nil then
+		return
+	end
 
 	if opts.icons ~= nil then
 		for k, v in pairs(opts.icons) do
@@ -420,7 +429,10 @@ function M.attach(client, bufnr)
 	})
 	vim.api.nvim_create_autocmd({ "InsertLeave", "BufEnter", "CursorHold" }, {
 		callback = function()
-			request_symbol(bufnr, update_data, client.id)
+			if not vim.b.navic_awaiting_lsp_response then
+				vim.b.navic_awaiting_lsp_response = true
+				request_symbol(bufnr, update_data, client.id)
+			end
 		end,
 		group = navic_augroup,
 		buffer = bufnr,
@@ -440,6 +452,10 @@ function M.attach(client, bufnr)
 		group = navic_augroup,
 		buffer = bufnr,
 	})
+
+	-- First call
+	vim.b.navic_awaiting_lsp_response = true
+	request_symbol(bufnr, update_data, client.id)
 end
 
 return M
