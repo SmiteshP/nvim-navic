@@ -423,7 +423,7 @@ function M.attach(client, bufnr)
 
 	vim.b.navic_client_id = client.id
 	vim.b.navic_client_name = client.name
-	vim.b.navic_changedtick = vim.b.changedtick
+	local changedtick = 0
 
 	local navic_augroup = vim.api.nvim_create_augroup("navic", { clear = false })
 	vim.api.nvim_clear_autocmds({
@@ -432,9 +432,9 @@ function M.attach(client, bufnr)
 	})
 	vim.api.nvim_create_autocmd({ "InsertLeave", "BufEnter", "CursorHold" }, {
 		callback = function()
-			if not vim.b.navic_awaiting_lsp_response and vim.b.navic_changedtick < vim.b.changedtick then
+			if not vim.b.navic_awaiting_lsp_response and changedtick < vim.b.changedtick then
 				vim.b.navic_awaiting_lsp_response = true
-				vim.b.navic_changedtick = vim.b.changedtick
+				changedtick = vim.b.changedtick
 				request_symbol(bufnr, update_data, client.id)
 			end
 		end,
