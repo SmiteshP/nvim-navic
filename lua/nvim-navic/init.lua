@@ -147,7 +147,7 @@ local function update_context(for_buf)
 		local l = 1
 		local h = #curr
 		while l <= h do
-			local m = ((l + h) - (l + h) % 2) / 2
+			local m = bit.rshift(l + h, 1)
 			local comp = in_range(cursor_pos, curr[m].scope)
 			if comp == -1 then
 				h = m - 1
