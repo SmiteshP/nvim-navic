@@ -128,6 +128,8 @@ local function update_context(for_buf)
 
 	local curr = navic_symbols[for_buf]
 
+	if curr == nil then return end
+
 	-- Find larger context that remained same
 	for _, context in ipairs(old_context_data) do
 		if
