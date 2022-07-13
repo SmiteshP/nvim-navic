@@ -57,9 +57,9 @@ local function parse(symbols)
 			scope["end"].line = scope["end"].line + 1
 
 			curr_parsed_symbol = {
-				name = val.name,
+				name = val.name or "<???>",
 				scope = scope,
-				kind = val.kind,
+				kind = val.kind or 0,
 				index = index,
 			}
 
@@ -266,6 +266,10 @@ local config = {
 	depth_limit = 0,
 	depth_limit_indicator = "..",
 }
+
+setmetatable(config.icons, {
+	__index = function() return "? " end
+})
 
 -- @Public Methods
 
