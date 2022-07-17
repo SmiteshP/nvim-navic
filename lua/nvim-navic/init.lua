@@ -132,6 +132,7 @@ local function update_context(for_buf)
 
 	-- Find larger context that remained same
 	for _, context in ipairs(old_context_data) do
+		if curr == nil then break end
 		if
 			in_range(cursor_pos, context.scope) == 0
 			and curr[context.index] ~= nil
