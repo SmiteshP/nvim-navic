@@ -34,25 +34,14 @@ local function parse(symbols)
 
 		for index, val in ipairs(curr_symbol) do
 			local curr_parsed_symbol = {}
+			local scope = val.range
 
-			-- SymbolInformation detection
-			if val.range == nil then
-				if not vim.g.navic_silence then
-					vim.notify(
-						'nvim-navic: Server "'
-							.. vim.lsp.get_client_by_id(vim.b.navic_client_id).name
-							.. '" does not support documentSymbols, it responds with SymbolInformation format which has been deprecated in latest LSP specification.',
-						vim.log.levels.ERROR
-					)
-				end
-				vim.api.nvim_clear_autocmds({
-					buffer = vim.api.nvim_win_get_buf(0),
-					group = "navic",
-				})
-				return
+			-- SymbolInformation objects store the range in a `location`
+			-- property
+			if scope == nil then
+				scope = val.location.range
 			end
 
-			local scope = val.range
 			scope["start"].line = scope["start"].line + 1
 			scope["end"].line = scope["end"].line + 1
 
@@ -72,14 +61,46 @@ local function parse(symbols)
 
 		if ret then
 			table.sort(ret, function(a, b)
-				if b.scope.start.line == a.scope.start.line then
-					return b.scope.start.character > a.scope.start.character
+				if b.scope["start"].line == a.scope["start"].line then
+					return b.scope["start"].character > a.scope["start"].character
 				end
-				return b.scope.start.line > a.scope.start.line
+				return b.scope["start"].line > a.scope["start"].line
 			end)
 		end
 
 		return ret
+	end
+
+	parsed_symbols = dfs(symbols)
+
+	-- Check if the symbol list contains SymbolInformation objects. If so, add
+	-- the symbol hierarchy to the parsed symbols.
+	if #symbols > 0 and symbols[1].range == nil then
+		for _, sym in ipairs(parsed_symbols) do
+			for _, other in ipairs(parsed_symbols) do
+				if other ~= sym then
+					local children = other.children or {}
+					local o = other.scope
+					local s = sym.scope
+					if
+						(
+							o["start"].line < s["start"].line
+							or (o["start"].line == s["start"].line and o["start"].character <= s["start"].character)
+						)
+						and (
+							o["end"].line > s["end"].line
+							or (o["end"].line == s["end"].line and o["end"].character >= s["end"].character)
+						)
+					then
+						table.insert(children, sym)
+					end
+
+					if #children > 0 then
+						other.children = children
+					end
+				end
+			end
+		end
 	end
 
 	parsed_symbols = dfs(symbols)
@@ -128,11 +149,15 @@ local function update_context(for_buf)
 
 	local curr = navic_symbols[for_buf]
 
-	if curr == nil then return end
+	if curr == nil then
+		return
+	end
 
 	-- Find larger context that remained same
 	for _, context in ipairs(old_context_data) do
-		if curr == nil then break end
+		if curr == nil then
+			break
+		end
 		if
 			in_range(cursor_pos, context.scope) == 0
 			and curr[context.index] ~= nil
@@ -269,7 +294,9 @@ local config = {
 }
 
 setmetatable(config.icons, {
-	__index = function() return "? " end
+	__index = function()
+		return "? "
+	end,
 })
 
 -- @Public Methods
