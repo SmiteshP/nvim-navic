@@ -25,6 +25,92 @@ local function request_symbol(for_buf, handler, client_id)
 	)
 end
 
+-- Return the relation of `other` to `symbol`
+--
+-- Possible values are:
+--   before
+--   around
+--   within
+--   after
+local function symbol_relation(symbol, other)
+	local s = symbol.scope
+	local o = other.scope
+
+	if
+		o["end"].line < s["start"].line
+		or (o["end"].line == s["start"].line and o["end"].character < s["start"].character)
+	then
+		return "before"
+	end
+
+	if
+		o["start"].line > s["end"].line
+		or (o["start"].line == s["end"].line and o["start"].character > s["end"].character)
+	then
+		return "after"
+	end
+
+	if
+		(
+			o["start"].line < s["start"].line
+			or (o["start"].line == s["start"].line and o["start"].character <= s["start"].character)
+		)
+		and (
+			o["end"].line > s["end"].line
+			or (o["end"].line == s["end"].line and o["end"].character >= s["end"].character)
+		)
+	then
+		return "around"
+	end
+
+	return "within"
+end
+
+-- Derive the hierarchy in a symbol list. Add all direct descendents of a
+-- symbol to a `children` property on the symbol.
+local function derive_hierarchy(symbols)
+	for _, sym in ipairs(symbols) do
+		local children = sym.children or {}
+
+		for _, other in ipairs(symbols) do
+			if other ~= sym then
+				local r = symbol_relation(sym, other)
+
+				-- other is after sym, so there's no point in looking further
+				if r == "after" then
+					break
+				end
+
+				-- other is within sym
+				if r == "within" then
+					local should_add = true
+
+					-- Check to see if other is contained by one of sym's
+					-- children. If it is, don't add it to sym's children
+					-- list as this list should only contain direct
+					-- children of sym.
+					if #children > 0 then
+						for _, child in ipairs(children) do
+							if symbol_relation(child, other) == "within" then
+								should_add = false
+								break
+							end
+						end
+					end
+
+					if should_add then
+						table.insert(children, other)
+					end
+				end
+			end
+		end
+
+		if #children > 0 then
+			sym.children = children
+		end
+	end
+end
+
 -- Process raw data from lsp server
 local function parse(symbols)
 	local parsed_symbols = {}
@@ -76,31 +162,7 @@ local function parse(symbols)
 	-- Check if the symbol list contains SymbolInformation objects. If so, add
 	-- the symbol hierarchy to the parsed symbols.
 	if #symbols > 0 and symbols[1].range == nil then
-		for _, sym in ipairs(parsed_symbols) do
-			for _, other in ipairs(parsed_symbols) do
-				if other ~= sym then
-					local children = other.children or {}
-					local o = other.scope
-					local s = sym.scope
-					if
-						(
-							o["start"].line < s["start"].line
-							or (o["start"].line == s["start"].line and o["start"].character <= s["start"].character)
-						)
-						and (
-							o["end"].line > s["end"].line
-							or (o["end"].line == s["end"].line and o["end"].character >= s["end"].character)
-						)
-					then
-						table.insert(children, sym)
-					end
-
-					if #children > 0 then
-						other.children = children
-					end
-				end
-			end
-		end
+		derive_hierarchy(parsed_symbols)
 	end
 
 	return parsed_symbols
