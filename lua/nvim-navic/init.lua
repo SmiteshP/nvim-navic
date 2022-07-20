@@ -136,33 +136,43 @@ local function in_range(cursor_pos, range)
 	return 0
 end
 
-local function update_context(for_buf)
-	local cursor_pos = vim.api.nvim_win_get_cursor(0)
-
-	if navic_context_data[for_buf] == nil then
-		navic_context_data[for_buf] = {}
+-- Walk a symbol tree. Any symbols that contain the current cursor position are
+-- added to a context list. The symbols must be sorted by start position (line
+-- and character).
+local function walk_symbols(syms, context, cursor_pos)
+	if syms == nil then
+		return
 	end
 
-	local symbols = navic_symbols[for_buf]
+	for _, sym in ipairs(syms) do
+		if in_range(cursor_pos, sym.scope) == 0 then
+			table.insert(context, sym)
+			walk_symbols(sym.children, context, cursor_pos)
+			return
+		end
+	end
+end
 
+local function update_context(for_buf)
+	local symbols = navic_symbols[for_buf]
 	if symbols == nil then
 		return
 	end
 
-	local function walk_syms(syms, context)
-		if syms ~= nil then
-			for _, sym in ipairs(syms) do
-				if in_range(cursor_pos, sym.scope) == 0 then
-					table.insert(context, sym)
-					walk_syms(sym.children, context)
-					return
-				end
-			end
-		end
+	local cursor_pos = vim.api.nvim_win_get_cursor(0)
+	local old_context = navic_context_data[for_buf] or {}
+	local new_context = {}
+
+	-- Check if the cursor is still within the previous context; if it is, this
+	-- will be faster than walking the entire symbol tree
+	walk_symbols(old_context, new_context, cursor_pos)
+
+	-- If the new context is empty, the cursor wasn't in the previous context,
+	-- so walk the tree again
+	if #new_context == 0 then
+		walk_symbols(symbols, new_context, cursor_pos)
 	end
 
-	local new_context = {}
-	walk_syms(symbols, new_context)
 	navic_context_data[for_buf] = new_context
 end
 
