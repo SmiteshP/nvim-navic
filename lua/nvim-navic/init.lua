@@ -25,6 +25,92 @@ local function request_symbol(for_buf, handler, client_id)
 	)
 end
 
+-- Return the relation of `other` to `symbol`
+--
+-- Possible values are:
+--   before
+--   around
+--   within
+--   after
+local function symbol_relation(symbol, other)
+	local s = symbol.scope
+	local o = other.scope
+
+	if
+		o["end"].line < s["start"].line
+		or (o["end"].line == s["start"].line and o["end"].character < s["start"].character)
+	then
+		return "before"
+	end
+
+	if
+		o["start"].line > s["end"].line
+		or (o["start"].line == s["end"].line and o["start"].character > s["end"].character)
+	then
+		return "after"
+	end
+
+	if
+		(
+			o["start"].line < s["start"].line
+			or (o["start"].line == s["start"].line and o["start"].character <= s["start"].character)
+		)
+		and (
+			o["end"].line > s["end"].line
+			or (o["end"].line == s["end"].line and o["end"].character >= s["end"].character)
+		)
+	then
+		return "around"
+	end
+
+	return "within"
+end
+
+-- Derive the hierarchy in a symbol list. Add all direct descendents of a
+-- symbol to a `children` property on the symbol.
+local function derive_hierarchy(symbols)
+	for _, sym in ipairs(symbols) do
+		local children = sym.children or {}
+
+		for _, other in ipairs(symbols) do
+			if other ~= sym then
+				local r = symbol_relation(sym, other)
+
+				-- other is after sym, so there's no point in looking further
+				if r == "after" then
+					break
+				end
+
+				-- other is within sym
+				if r == "within" then
+					local should_add = true
+
+					-- Check to see if other is contained by one of sym's
+					-- children. If it is, don't add it to sym's children
+					-- list as this list should only contain direct
+					-- children of sym.
+					if #children > 0 then
+						for _, child in ipairs(children) do
+							if symbol_relation(child, other) == "within" then
+								should_add = false
+								break
+							end
+						end
+					end
+
+					if should_add then
+						table.insert(children, other)
+					end
+				end
+			end
+		end
+
+		if #children > 0 then
+			sym.children = children
+		end
+	end
+end
+
 -- Process raw data from lsp server
 local function parse(symbols)
 	local parsed_symbols = {}
@@ -34,25 +120,14 @@ local function parse(symbols)
 
 		for index, val in ipairs(curr_symbol) do
 			local curr_parsed_symbol = {}
+			local scope = val.range
 
-			-- SymbolInformation detection
-			if val.range == nil then
-				if not vim.g.navic_silence then
-					vim.notify(
-						'nvim-navic: Server "'
-							.. vim.lsp.get_client_by_id(vim.b.navic_client_id).name
-							.. '" does not support documentSymbols, it responds with SymbolInformation format which has been deprecated in latest LSP specification.',
-						vim.log.levels.ERROR
-					)
-				end
-				vim.api.nvim_clear_autocmds({
-					buffer = vim.api.nvim_win_get_buf(0),
-					group = "navic",
-				})
-				return
+			-- SymbolInformation objects store the range in a `location`
+			-- property
+			if scope == nil then
+				scope = val.location.range
 			end
 
-			local scope = val.range
 			scope["start"].line = scope["start"].line + 1
 			scope["end"].line = scope["end"].line + 1
 
@@ -72,10 +147,10 @@ local function parse(symbols)
 
 		if ret then
 			table.sort(ret, function(a, b)
-				if b.scope.start.line == a.scope.start.line then
-					return b.scope.start.character > a.scope.start.character
+				if b.scope["start"].line == a.scope["start"].line then
+					return b.scope["start"].character > a.scope["start"].character
 				end
-				return b.scope.start.line > a.scope.start.line
+				return b.scope["start"].line > a.scope["start"].line
 			end)
 		end
 
@@ -83,6 +158,12 @@ local function parse(symbols)
 	end
 
 	parsed_symbols = dfs(symbols)
+
+	-- Check if the symbol list contains SymbolInformation objects. If so, add
+	-- the symbol hierarchy to the parsed symbols.
+	if #symbols > 0 and symbols[1].range == nil then
+		derive_hierarchy(parsed_symbols)
+	end
 
 	return parsed_symbols
 end
@@ -117,60 +198,44 @@ local function in_range(cursor_pos, range)
 	return 0
 end
 
+-- Walk a symbol tree. Any symbols that contain the current cursor position are
+-- added to a context list. The symbols must be sorted by start position (line
+-- and character).
+local function walk_symbols(syms, context, cursor_pos)
+	if syms == nil then
+		return
+	end
+
+	for _, sym in ipairs(syms) do
+		if in_range(cursor_pos, sym.scope) == 0 then
+			table.insert(context, sym)
+			walk_symbols(sym.children, context, cursor_pos)
+			return
+		end
+	end
+end
+
 local function update_context(for_buf)
+	local symbols = navic_symbols[for_buf]
+	if symbols == nil then
+		return
+	end
+
 	local cursor_pos = vim.api.nvim_win_get_cursor(0)
+	local old_context = navic_context_data[for_buf] or {}
+	local new_context = {}
 
-	if navic_context_data[for_buf] == nil then
-		navic_context_data[for_buf] = {}
-	end
-	local old_context_data = navic_context_data[for_buf]
-	local new_context_data = {}
+	-- Check if the cursor is still within the previous context; if it is, this
+	-- will be faster than walking the entire symbol tree
+	walk_symbols(old_context, new_context, cursor_pos)
 
-	local curr = navic_symbols[for_buf]
-
-	if curr == nil then return end
-
-	-- Find larger context that remained same
-	for _, context in ipairs(old_context_data) do
-		if curr == nil then break end
-		if
-			in_range(cursor_pos, context.scope) == 0
-			and curr[context.index] ~= nil
-			and context.name == curr[context.index].name
-			and context.kind == curr[context.index].kind
-		then
-			table.insert(new_context_data, curr[context.index])
-			curr = curr[context.index].children
-		else
-			break
-		end
+	-- If the new context is empty, the cursor wasn't in the previous context,
+	-- so walk the tree again
+	if #new_context == 0 then
+		walk_symbols(symbols, new_context, cursor_pos)
 	end
 
-	-- Fill out context_data
-	while curr ~= nil do
-		local go_deeper = false
-		local l = 1
-		local h = #curr
-		while l <= h do
-			local m = bit.rshift(l + h, 1)
-			local comp = in_range(cursor_pos, curr[m].scope)
-			if comp == -1 then
-				h = m - 1
-			elseif comp == 1 then
-				l = m + 1
-			else
-				table.insert(new_context_data, curr[m])
-				curr = curr[m].children
-				go_deeper = true
-				break
-			end
-		end
-		if not go_deeper then
-			break
-		end
-	end
-
-	navic_context_data[for_buf] = new_context_data
+	navic_context_data[for_buf] = new_context
 end
 
 -- stylua: ignore
@@ -269,7 +334,9 @@ local config = {
 }
 
 setmetatable(config.icons, {
-	__index = function() return "? " end
+	__index = function()
+		return "? "
+	end,
 })
 
 -- @Public Methods
