@@ -103,8 +103,6 @@ local function parse(symbols)
 		end
 	end
 
-	parsed_symbols = dfs(symbols)
-
 	return parsed_symbols
 end
 
@@ -144,58 +142,28 @@ local function update_context(for_buf)
 	if navic_context_data[for_buf] == nil then
 		navic_context_data[for_buf] = {}
 	end
-	local old_context_data = navic_context_data[for_buf]
-	local new_context_data = {}
 
-	local curr = navic_symbols[for_buf]
+	local symbols = navic_symbols[for_buf]
 
-	if curr == nil then
+	if symbols == nil then
 		return
 	end
 
-	-- Find larger context that remained same
-	for _, context in ipairs(old_context_data) do
-		if curr == nil then
-			break
-		end
-		if
-			in_range(cursor_pos, context.scope) == 0
-			and curr[context.index] ~= nil
-			and context.name == curr[context.index].name
-			and context.kind == curr[context.index].kind
-		then
-			table.insert(new_context_data, curr[context.index])
-			curr = curr[context.index].children
-		else
-			break
-		end
-	end
-
-	-- Fill out context_data
-	while curr ~= nil do
-		local go_deeper = false
-		local l = 1
-		local h = #curr
-		while l <= h do
-			local m = bit.rshift(l + h, 1)
-			local comp = in_range(cursor_pos, curr[m].scope)
-			if comp == -1 then
-				h = m - 1
-			elseif comp == 1 then
-				l = m + 1
-			else
-				table.insert(new_context_data, curr[m])
-				curr = curr[m].children
-				go_deeper = true
-				break
+	local function walk_syms(syms, context)
+		if syms ~= nil then
+			for _, sym in ipairs(syms) do
+				if in_range(cursor_pos, sym.scope) == 0 then
+					table.insert(context, sym)
+					walk_syms(sym.children, context)
+					return
+				end
 			end
 		end
-		if not go_deeper then
-			break
-		end
 	end
 
-	navic_context_data[for_buf] = new_context_data
+	local new_context = {}
+	walk_syms(symbols, new_context)
+	navic_context_data[for_buf] = new_context
 end
 
 -- stylua: ignore
