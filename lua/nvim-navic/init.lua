@@ -327,7 +327,9 @@ function M.is_available()
 	return vim.b.navic_client_id ~= nil
 end
 
-function M.get_location(opts)
+function M.get_location(buffnr, opts)
+	update_context(buffnr)
+
 	local local_config = {}
 
 	if opts ~= nil then
@@ -444,13 +446,6 @@ function M.attach(client, bufnr)
 				changedtick = vim.b.changedtick
 				request_symbol(bufnr, update_data, client.id)
 			end
-		end,
-		group = navic_augroup,
-		buffer = bufnr,
-	})
-	vim.api.nvim_create_autocmd({ "CursorHold", "CursorMoved" }, {
-		callback = function()
-			update_context(bufnr)
 		end,
 		group = navic_augroup,
 		buffer = bufnr,
