@@ -67,40 +67,40 @@ local function symbol_relation(symbol, other)
 end
 
 -- Derive the hierarchy in a symbol list. Add all direct descendents of a
--- symbol to a `children` property on the symbol.
+-- symbol to a `children` property on the symbol. The symbols must be sorted by
+-- start position (line and character).
 local function derive_hierarchy(symbols)
-	for _, sym in ipairs(symbols) do
+	for idx, sym in ipairs(symbols) do
 		local children = sym.children or {}
 
-		for _, other in ipairs(symbols) do
-			if other ~= sym then
-				local r = symbol_relation(sym, other)
+		for other_idx = idx + 1, #symbols, 1 do
+			local other = symbols[other_idx]
+			local r = symbol_relation(sym, other)
 
-				-- other is after sym, so there's no point in looking further
-				if r == "after" then
-					break
-				end
+			-- other is after sym, so there's no point in looking further
+			if r == "after" then
+				break
+			end
 
-				-- other is within sym
-				if r == "within" then
-					local should_add = true
+			-- other is within sym
+			if r == "within" then
+				local should_add = true
 
-					-- Check to see if other is contained by one of sym's
-					-- children. If it is, don't add it to sym's children
-					-- list as this list should only contain direct
-					-- children of sym.
-					if #children > 0 then
-						for _, child in ipairs(children) do
-							if symbol_relation(child, other) == "within" then
-								should_add = false
-								break
-							end
+				-- Check to see if other is contained by one of sym's
+				-- children. If it is, don't add it to sym's children
+				-- list as this list should only contain direct
+				-- children of sym.
+				if #children > 0 then
+					for _, child in ipairs(children) do
+						if symbol_relation(child, other) == "within" then
+							should_add = false
+							break
 						end
 					end
+				end
 
-					if should_add then
-						table.insert(children, other)
-					end
+				if should_add then
+					table.insert(children, other)
 				end
 			end
 		end
