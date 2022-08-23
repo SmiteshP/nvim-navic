@@ -231,6 +231,7 @@ local lsp_num_to_str = {
 	[24] = "Event",
 	[25] = "Operator",
 	[26] = "TypeParameter",
+	[255] = "Macro",
 }
 
 local config = {
@@ -261,6 +262,7 @@ local config = {
 		[24] = " ", -- Event
 		[25] = " ", -- Operator
 		[26] = " ", -- TypeParameter
+		[255] = " ", -- Macro
 	},
 	highlight = false,
 	separator = " > ",
