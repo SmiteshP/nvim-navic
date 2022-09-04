@@ -103,20 +103,21 @@ local function symbolInfo_treemaker(symbols)
 
 	-- build tree
 	for i = 2, #symbols, 1 do
-		local prev_chain_relation = symbol_relation(symbols[i], symbols[i - 1])
-		local prev_node_relation = symbol_relation(symbols[i], stack[#stack])
+		local prev_chain_node_relation = symbol_relation(symbols[i], symbols[i - 1])
+		local stack_top_node_relation = symbol_relation(symbols[i], stack[#stack])
 
-		if prev_chain_relation == "around" then
+		if prev_chain_node_relation == "around" then
+			-- current node is child node of previous chain node
 			table.insert(stack, symbols[i - 1])
 			if not symbols[i - 1].children then
 				symbols[i - 1].children = {}
 			end
 			table.insert(symbols[i - 1].children, symbols[i])
-		elseif prev_chain_relation == "before" and prev_node_relation == "around" then
-		  -- the previous symbol comes before this one and the current node
+		elseif prev_chain_node_relation == "before" and stack_top_node_relation == "around" then
+			-- the previous symbol comes before this one and the current node
 			-- contains this symbol; add this symbol as a child of the current node
 			table.insert(stack[#stack].children, symbols[i])
-		elseif prev_node_relation == "before" then
+		elseif stack_top_node_relation == "before" then
 			-- the current node comes before this symbol; pop nodes off the stack to
 			-- find the parent of this symbol and add this symbol as its child
 			while symbol_relation(symbols[i], stack[#stack]) ~= "around" do
