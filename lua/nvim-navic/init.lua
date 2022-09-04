@@ -113,6 +113,8 @@ local function symbolInfo_treemaker(symbols)
 			end
 			table.insert(symbols[i - 1].children, symbols[i])
 		elseif prev_chain_relation == "before" and prev_node_relation == "around" then
+		  -- the previous symbol comes before this one and the current node
+			-- contains this symbol; add this symbol as a child of the current node
 			table.insert(stack[#stack].children, symbols[i])
 		elseif prev_node_relation == "before" then
 			-- the current node comes before this symbol; pop nodes off the stack to
