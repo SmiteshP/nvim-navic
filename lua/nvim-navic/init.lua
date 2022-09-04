@@ -317,6 +317,7 @@ function M.get_data()
 			type = lsp_num_to_str[v.kind],
 			name = v.name,
 			icon = config.icons[v.kind],
+			scope = v.scope
 		})
 	end
 
