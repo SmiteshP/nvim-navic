@@ -114,7 +114,9 @@ local function symbolInfo_treemaker(symbols)
 			table.insert(symbols[i - 1].children, symbols[i])
 		elseif prev_chain_relation == "before" and prev_node_relation == "around" then
 			table.insert(stack[#stack].children, symbols[i])
-		elseif prev_chain_relation == "before" and prev_node_relation == "before" then
+		elseif prev_node_relation == "before" then
+			-- the current node comes before this symbol; pop nodes off the stack to
+			-- find the parent of this symbol and add this symbol as its child
 			while symbol_relation(symbols[i], stack[#stack]) ~= "around" do
 				stack[#stack] = nil
 			end
