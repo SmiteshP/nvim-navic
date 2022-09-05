@@ -25,6 +25,111 @@ local function request_symbol(for_buf, handler, client_id)
 	)
 end
 
+-- relation of 'other' with repect to 'symbol'
+local function symbol_relation(symbol, other)
+	local s = symbol.scope
+	local o = other.scope
+
+	if
+		o["end"].line < s["start"].line
+		or (o["end"].line == s["start"].line and o["end"].character < s["start"].character)
+	then
+		return "before"
+	end
+
+	if
+		o["start"].line > s["end"].line
+		or (o["start"].line == s["end"].line and o["start"].character > s["end"].character)
+	then
+		return "after"
+	end
+
+	if
+		(
+			o["start"].line < s["start"].line
+			or (o["start"].line == s["start"].line and o["start"].character <= s["start"].character)
+		)
+		and (
+			o["end"].line > s["end"].line
+			or (o["end"].line == s["end"].line and o["end"].character >= s["end"].character)
+		)
+	then
+		return "around"
+	end
+
+	return "within"
+end
+
+-- Construct tree structure based on scope information
+-- Could be inaccurate ?? Not intended to be used like this...
+local function symbolInfo_treemaker(symbols)
+	-- convert location to scope
+	for _, node in ipairs(symbols) do
+		node.scope = node.location.range
+		node.scope["start"].line = node.scope["start"].line + 1
+		node.scope["end"].line = node.scope["end"].line + 1
+		node.location = nil
+	end
+
+	-- sort with repect to node height and location
+	-- nodes closer to root node come before others
+	-- nodes and same level are arranged according to scope
+	table.sort(symbols, function(a, b)
+		local loc = symbol_relation(a, b)
+		if loc == "after" or loc == "within" then
+			return true
+		end
+		return false
+	end)
+
+	-- root node
+	local tree = {
+		scope = {
+			start = {
+				line = -10,
+				character = 0,
+			},
+			["end"] = {
+				line = 2147483640,
+				character = 0,
+			},
+		},
+		children = {},
+	}
+	local stack = {}
+
+	table.insert(tree.children, symbols[1])
+	table.insert(stack, tree)
+
+	-- build tree
+	for i = 2, #symbols, 1 do
+		local prev_chain_node_relation = symbol_relation(symbols[i], symbols[i - 1])
+		local stack_top_node_relation = symbol_relation(symbols[i], stack[#stack])
+
+		if prev_chain_node_relation == "around" then
+			-- current node is child node of previous chain node
+			table.insert(stack, symbols[i - 1])
+			if not symbols[i - 1].children then
+				symbols[i - 1].children = {}
+			end
+			table.insert(symbols[i - 1].children, symbols[i])
+		elseif prev_chain_node_relation == "before" and stack_top_node_relation == "around" then
+			-- the previous symbol comes before this one and the current node
+			-- contains this symbol; add this symbol as a child of the current node
+			table.insert(stack[#stack].children, symbols[i])
+		elseif stack_top_node_relation == "before" then
+			-- the current node comes before this symbol; pop nodes off the stack to
+			-- find the parent of this symbol and add this symbol as its child
+			while symbol_relation(symbols[i], stack[#stack]) ~= "around" do
+				stack[#stack] = nil
+			end
+			table.insert(stack[#stack].children, symbols[i])
+		end
+	end
+
+	return tree.children
+end
+
 -- Process raw data from lsp server
 local function parse(symbols)
 	local parsed_symbols = {}
@@ -34,23 +139,6 @@ local function parse(symbols)
 
 		for index, val in ipairs(curr_symbol) do
 			local curr_parsed_symbol = {}
-
-			-- SymbolInformation detection
-			if val.range == nil then
-				if not vim.g.navic_silence then
-					vim.notify(
-						'nvim-navic: Server "'
-							.. vim.lsp.get_client_by_id(vim.b.navic_client_id).name
-							.. '" does not support documentSymbols, it responds with SymbolInformation format which has been deprecated in latest LSP specification.',
-						vim.log.levels.ERROR
-					)
-				end
-				vim.api.nvim_clear_autocmds({
-					buffer = vim.api.nvim_win_get_buf(0),
-					group = "navic",
-				})
-				return
-			end
 
 			local scope = val.range
 			scope["start"].line = scope["start"].line + 1
@@ -82,7 +170,12 @@ local function parse(symbols)
 		return ret
 	end
 
-	parsed_symbols = dfs(symbols)
+	-- detect type
+	if #symbols >= 1 and symbols[1].range == nil then
+		parsed_symbols = symbolInfo_treemaker(symbols)
+	else
+		parsed_symbols = dfs(symbols)
+	end
 
 	return parsed_symbols
 end
