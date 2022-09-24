@@ -32,14 +32,14 @@ local function symbol_relation(symbol, other)
 
 	if
 		o["end"].line < s["start"].line
-		or (o["end"].line == s["start"].line and o["end"].character < s["start"].character)
+		or (o["end"].line == s["start"].line and o["end"].character <= s["start"].character)
 	then
 		return "before"
 	end
 
 	if
 		o["start"].line > s["end"].line
-		or (o["start"].line == s["end"].line and o["start"].character > s["end"].character)
+		or (o["start"].line == s["end"].line and o["start"].character >= s["end"].character)
 	then
 		return "after"
 	end
