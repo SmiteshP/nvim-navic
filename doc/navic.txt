@@ -39,8 +39,8 @@ API                                                                 *navic-api*
 
 *navic.get_data* ()
 	Returns a table of tables representing the current code context. Contains
-	information about the symbol's name, kind, type and its icon at each
-	level. Relation between type and kind is defiend on LSP's website.
+	information about the symbol's name, kind, type, scope and its icon at 
+	each level. Relation between type and kind is defiend on LSP's website.
 	`https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#symbolKind`
 
 =============================================================================
