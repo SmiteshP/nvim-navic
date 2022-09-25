@@ -279,16 +279,24 @@ If you have a creative use case and want the raw context data to work with, you 
 ```lua
  {
     {
-        name = "myclass",
-        type = "Class",
-        icon = " ",
-        kind = 5
+        name  = "myclass",
+        type  = "Class",
+        icon  = " ",
+        kind  = 5,
+        scope = {
+            start = { line = 1, character = 0 },
+            end = { line = 10, character = 0 }
+        }
     },
     {
-        name = "mymethod",
-        type = "Method",
-        icon = " ",
-        kind = 6
+        name  = "mymethod",
+        type  = "Method",
+        icon  = " ",
+        kind  = 6,
+        scope = {
+            start = { line = 2, character = 4 },
+            end = { line = 5, character = 4 }
+        }
     }
  }
 ```
