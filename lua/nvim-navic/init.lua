@@ -324,7 +324,6 @@ local lsp_num_to_str = {
 	[24] = "Event",
 	[25] = "Operator",
 	[26] = "TypeParameter",
-	[255] = "Macro",
 }
 
 local config = {
@@ -365,6 +364,9 @@ local config = {
 
 setmetatable(config.icons, {
 	__index = function() return "? " end
+})
+setmetatable(lsp_num_to_str, {
+	__index = function() return "Text" end
 })
 
 -- @Public Methods
