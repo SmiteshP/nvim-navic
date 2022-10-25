@@ -397,6 +397,9 @@ function M.setup(opts)
 	if opts.highlight ~= nil then
 		config.highlight = opts.highlight
 	end
+	if opts.safe_output ~= nil then
+		config.safe_output = opts.safe_output
+	end
 end
 
 -- returns table of context or nil
