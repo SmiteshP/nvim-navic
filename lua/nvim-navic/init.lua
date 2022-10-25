@@ -360,6 +360,7 @@ local config = {
 	separator = " > ",
 	depth_limit = 0,
 	depth_limit_indicator = "..",
+	safe_output = true
 }
 
 setmetatable(config.icons, {
@@ -451,6 +452,9 @@ function M.get_location(opts)
 		if opts.highlight ~= nil then
 			local_config.highlight = opts.highlight
 		end
+		if opts.safe_output ~= nil then
+			local_config.safe_output = opts.safe_output
+		end
 	else
 		local_config = config
 	end
@@ -474,10 +478,17 @@ function M.get_location(opts)
 	end
 
 	for _, v in ipairs(data) do
-		if local_config.highlight then
-			table.insert(location, add_hl(v.kind, v.name))
+		if local_config.safe_output then
+			name = string.gsub(v.name, "%%", "%%%%")
+			name = string.gsub(v.name, "\n", " ")
 		else
-			table.insert(location, v.icon .. v.name)
+			name = v.name
+		end
+
+		if local_config.highlight then
+			table.insert(location, add_hl(v.kind, name))
+		else
+			table.insert(location, v.icon .. name)
 		end
 	end
 

@@ -39,7 +39,7 @@ API                                                                 *navic-api*
 
 *navic.get_data* ()
 	Returns a table of tables representing the current code context. Contains
-	information about the symbol's name, kind, type, scope and its icon at 
+	information about the symbol's name, kind, type, scope and its icon at
 	each level. Relation between type and kind is defiend on LSP's website.
 	`https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#symbolKind`
 
@@ -118,6 +118,11 @@ Use |navic.setup| to override any of the default options
 		Icons to show for captured symbols. Default icons assume that you
 		have nerd-font.
 
+	highlight: boolean
+		Add colors to icons and text as defined by highlight groups
+		NavicIcons* (NavicIconsFile, NavicIconsModule.. etc.), NavicText and
+		NavicSeparator.
+
 	separator: string
 		Icon to be used to separate two symbols.
 
@@ -127,6 +132,9 @@ Use |navic.setup| to override any of the default options
 
 	depth_limit_indicator: string
 		Indicator signifing that displayed string is truncated.
+
+	safe_output: boolean
+		Sanitize the output for use in statusline and winbar.
 
 Defaults >
 	navic.setup {
@@ -162,6 +170,7 @@ Defaults >
 		separator = " > ",
 		depth_limit = 0,
 		depth_limit_indicator = "..",
+		safe_output = true,
 	}
 <
 
