@@ -185,6 +185,10 @@ local navic_context_data = {}
 
 local function update_data(for_buf, symbols)
 	navic_symbols[for_buf] = parse(symbols)
+	vim.api.nvim_exec_autocmds('User', {
+		pattern = 'NavicUpdate',
+		data = { buf = for_buf },
+	})
 end
 
 local function in_range(cursor_pos, range)
