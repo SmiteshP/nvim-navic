@@ -481,9 +481,11 @@ function M.get_location(opts)
 	end
 
 	for _, v in ipairs(data) do
+		local name = ""
+
 		if local_config.safe_output then
 			name = string.gsub(v.name, "%%", "%%%%")
-			name = string.gsub(v.name, "\n", " ")
+			name = string.gsub(name, "\n", " ")
 		else
 			name = v.name
 		end
