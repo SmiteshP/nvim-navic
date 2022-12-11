@@ -290,7 +290,7 @@ gl.section.right[1]= {
 
 If you have a creative use case and want the raw context data to work with, you can use the following function
 
-* `get_data()` : Returns a table of intermediate representation of data. Table of tables that contain 'kind', 'name' and 'icon' for each context.
+* `get_data(bufnr)` : Returns a table of intermediate representation of data. Table of tables that contain 'kind', 'name' and 'icon' for each context. `bufnr` is optional argument, defaults to current buffer.
 
 <details>
 <summary>An example output of <code>get_data</code> function: </summary>
