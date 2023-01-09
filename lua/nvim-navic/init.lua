@@ -498,14 +498,31 @@ function M.get_location(opts)
 		end
 	end
 
-	if local_config.depth_limit ~= 0 and #location > local_config.depth_limit then
+  if local_config.depth_limit == "auto" then
+    local remove_counter = 0
+    while
+      table.concat(
+        location,
+        (local_config.highlight and "%#NavicSeparator#" or '')
+        .. local_config.separator
+        .. (local_config.highlight and "%*" or ""))
+      :len() > vim.api.nvim_win_get_width(0) do
+      location = vim.list_slice(location, 1, #location)
+      remove_counter = remove_counter + 1
+    end
+    if remove_counter and local_config.highlight then
+			table.insert(location, 1, "%#NavicSeparator#" .. local_config.depth_limit_indicator .. "%*")
+		else
+			table.insert(location, 1, local_config.depth_limit_indicator)
+    end
+  elseif local_config.depth_limit ~= 0 and #location > local_config.depth_limit then
 		location = vim.list_slice(location, #location - local_config.depth_limit + 1, #location)
 		if local_config.highlight then
 			table.insert(location, 1, "%#NavicSeparator#" .. local_config.depth_limit_indicator .. "%*")
 		else
 			table.insert(location, 1, local_config.depth_limit_indicator)
 		end
-	end
+  end
 
 	local ret = ""
 
