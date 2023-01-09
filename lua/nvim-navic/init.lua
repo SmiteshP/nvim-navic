@@ -498,30 +498,47 @@ function M.get_location(opts)
 		end
 	end
 
-  if local_config.depth_limit == "auto" then
-    local remove_counter = 0
-    while
-      table.concat(
-        location,
-        (local_config.highlight and "%#NavicSeparator#" or '')
-        .. local_config.separator
-        .. (local_config.highlight and "%*" or ""))
-      :len() > vim.api.nvim_win_get_width(0) do
-      location = vim.list_slice(location, 1, #location)
-      remove_counter = remove_counter + 1
+  if type(local_config.depth_limit) == "function" then
+    local context = {
+      winid = vim.api.nvim_get_current_win(),
+      path = vim.fn.expand('%:p'),
+      mod = vim.bo.mod,
+    }
+    if type(local_config.depth_limit(context)) == "number" then
+      local start_index = 0
+      while
+        table.concat(
+          vim.list_slice(location, start_index + 1, #location),
+          (local_config.highlight and "%#NavicSeparator#" or '')
+          .. local_config.separator
+          .. (local_config.highlight and "%*" or ""))
+        :len() > local_config.depth_limit(context) do
+        start_index = start_index + 1
+      end
+      location = vim.list_slice(location, start_index, #location)
+      if start_index > 1 then
+        if local_config.highlight then
+          table.insert(location, 1, "%#NavicSeparator#" .. local_config.depth_limit_indicator .. "%*")
+        else
+          table.insert(location, 1, local_config.depth_limit_indicator)
+        end
+      end
+    else
+      local_config.depth_limit = 0
     end
-    if remove_counter and local_config.highlight then
-			table.insert(location, 1, "%#NavicSeparator#" .. local_config.depth_limit_indicator .. "%*")
-		else
-			table.insert(location, 1, local_config.depth_limit_indicator)
+  end
+
+  if type(local_config.depth_limit) == "number"
+    and local_config.depth_limit ~= 0 and #location > local_config.depth_limit then
+    local start_index = #location - local_config.depth_limit + 1
+		location = vim.list_slice(location, start_index, #location)
+    if start_index > 1 then
+      if local_config.highlight then
+        table.insert(location, 1, "%#NavicSeparator#" .. local_config.depth_limit_indicator .. "%*")
+      else
+        table.insert(location, 1, local_config.depth_limit_indicator)
+      end
     end
-  elseif local_config.depth_limit ~= 0 and #location > local_config.depth_limit then
-		location = vim.list_slice(location, #location - local_config.depth_limit + 1, #location)
-		if local_config.highlight then
-			table.insert(location, 1, "%#NavicSeparator#" .. local_config.depth_limit_indicator .. "%*")
-		else
-			table.insert(location, 1, local_config.depth_limit_indicator)
-		end
   end
 
 	local ret = ""
