@@ -508,10 +508,12 @@ function M.get_location(opts)
 			local start_index = 0
 			while
 				table.concat(
-				vim.list_slice(location, start_index + 1, #location),
+					vim.list_slice(location, start_index + 1, #location),
 					(local_config.highlight and "%#NavicSeparator#" or '')
 					.. local_config.separator
 					.. (local_config.highlight and "%*" or ""))
+				:gsub('%%#%a+#', '')
+				:gsub('%%', ''):gsub('%*', '')
 				:len() > local_config.depth_limit(context)
 			do
 				start_index = start_index + 1
