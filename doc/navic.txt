@@ -12,6 +12,7 @@ CONTENTS                                                     *navic-components*
 
 API                                                                 |navic-api|
 Usage                                                             |navic-usage|
+Variables                                                     navic-variables
 Customisation                                                 |navic-customise|
 Highlights                                                   |navic-highlights|
 
@@ -111,6 +112,24 @@ You can silence warning/error messages thrown by |nvim-navic| by setting
 at the start of your config. However this is not advisable, the error
 messages indicate issues in your setup.
 
+=============================================================================
+Variables                                                     *navic-variables*
+
+*vim.g.navic_silence*
+Set it to true to silence the any warnings/error messages thrown by nvim-navic
+
+*vim.b.navic_lazy_update_context*
+Set it to true to update context only on CursorHold event. Could be usefull if
+you are facing performance issues on large files. Example usage
+>
+	vim.api.nvim_create_autocmd("BufEnter", {
+		callback = function()
+			if vim.api.nvim_buf_line_count(0) > 10000 then
+				vim.b.navic_lazy_update_context = true
+			end
+		end,
+	})
+<
 =============================================================================
 Customisation                                                 *navic-customise*
 
