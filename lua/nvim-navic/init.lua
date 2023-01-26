@@ -221,11 +221,15 @@ local function update_context(for_buf)
 
 	local curr = navic_symbols[for_buf]
 
-	if curr == nil then return end
+	if curr == nil then
+		return
+	end
 
 	-- Find larger context that remained same
 	for _, context in ipairs(old_context_data) do
-		if curr == nil then break end
+		if curr == nil then
+			break
+		end
 		if
 			in_range(cursor_pos, context.scope) == 0
 			and curr[context.index] ~= nil
@@ -360,14 +364,18 @@ local config = {
 	separator = " > ",
 	depth_limit = 0,
 	depth_limit_indicator = "..",
-	safe_output = true
+	safe_output = true,
 }
 
 setmetatable(config.icons, {
-	__index = function() return "? " end
+	__index = function()
+		return "? "
+	end,
 })
 setmetatable(lsp_num_to_str, {
-	__index = function() return "Text" end
+	__index = function()
+		return "Text"
+	end,
 })
 
 -- @Public Methods
@@ -419,7 +427,7 @@ function M.get_data(bufnr)
 			type = lsp_num_to_str[v.kind],
 			name = v.name,
 			icon = config.icons[v.kind],
-			scope = v.scope
+			scope = v.scope,
 		})
 	end
 
