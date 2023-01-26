@@ -563,14 +563,23 @@ function M.attach(client, bufnr)
 		group = navic_augroup,
 		buffer = bufnr,
 	})
-	vim.api.nvim_create_autocmd({ "CursorHold", "CursorMoved" }, {
+	vim.api.nvim_create_autocmd("CursorHold", {
 		callback = function()
 			update_context(bufnr)
 		end,
 		group = navic_augroup,
 		buffer = bufnr,
 	})
-	vim.api.nvim_create_autocmd({ "BufDelete" }, {
+	vim.api.nvim_create_autocmd("CursorMoved", {
+		callback = function()
+			if vim.b.navic_lazy_update_context ~= true then
+				update_context(bufnr)
+			end
+		end,
+		group = navic_augroup,
+		buffer = bufnr,
+	})
+	vim.api.nvim_create_autocmd("BufDelete", {
 		callback = function()
 			navic_context_data[bufnr] = nil
 			navic_symbols[bufnr] = nil
