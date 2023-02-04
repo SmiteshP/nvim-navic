@@ -434,8 +434,9 @@ function M.get_data(bufnr)
 	return ret
 end
 
-function M.is_available()
-	return vim.b.navic_client_id ~= nil
+function M.is_available(bufnr)
+	bufnr = bufnr or vim.api.nvim_get_current_buf()
+	return vim.b[bufnr].navic_client_id ~= nil
 end
 
 function M.get_location(opts)
@@ -537,7 +538,7 @@ function M.attach(client, bufnr)
 		return
 	end
 
-	if vim.b.navic_client_id ~= nil and vim.b.navic_client_name ~= client.name then
+	if vim.b[bufnr].navic_client_id ~= nil and vim.b[bufnr].navic_client_name ~= client.name then
 		local prev_client = vim.lsp.get_client_by_id(client.id)
 		if not vim.g.navic_silence then
 			vim.notify(
@@ -551,8 +552,8 @@ function M.attach(client, bufnr)
 		return
 	end
 
-	vim.b.navic_client_id = client.id
-	vim.b.navic_client_name = client.name
+	vim.b[bufnr].navic_client_id = client.id
+	vim.b[bufnr].navic_client_name = client.name
 	local changedtick = 0
 
 	local navic_augroup = vim.api.nvim_create_augroup("navic", { clear = false })
@@ -597,7 +598,7 @@ function M.attach(client, bufnr)
 	})
 
 	-- First call
-	vim.b.navic_awaiting_lsp_response = true
+	vim.b[bufnr].navic_awaiting_lsp_response = true
 	request_symbol(bufnr, update_data, client.id)
 end
 
