@@ -44,6 +44,8 @@ local function symbolInfo_treemaker(symbols)
 		node.scope["start"].line = node.scope["start"].line + 1
 		node.scope["end"].line = node.scope["end"].line + 1
 		node.location = nil
+
+		node.name_range = node.scope
 	end
 
 	-- sort with repect to node height and location
@@ -119,9 +121,14 @@ local function parse(symbols)
 			scope["start"].line = scope["start"].line + 1
 			scope["end"].line = scope["end"].line + 1
 
+			local name_range = val.selectionRange
+			name_range["start"].line = name_range["start"].line + 1
+			name_range["end"].line = name_range["end"].line + 1
+
 			curr_parsed_symbol = {
 				name = val.name or "<???>",
 				scope = scope,
+				name_range = name_range,
 				kind = val.kind or 0,
 				index = index,
 			}
@@ -207,6 +214,10 @@ end
 
 local navic_symbols = {}
 local navic_context_data = {}
+
+function M.get_symbols(bufnr)
+	return navic_symbols[bufnr]
+end
 
 function M.get_context_data(bufnr)
 	return navic_context_data[bufnr]
@@ -310,6 +321,11 @@ local lsp_str_to_num = {
 	Operator      = 25,
 	TypeParameter = 26,
 }
+setmetatable(lsp_str_to_num, {
+	__index = function()
+		return 0
+	end,
+})
 
 function M.adapt_lsp_str_to_num(s)
 	return lsp_str_to_num[s]
