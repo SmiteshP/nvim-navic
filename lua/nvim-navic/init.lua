@@ -88,14 +88,16 @@ function M.get_data(bufnr)
 
 	local ret = {}
 
-	for _, v in ipairs(context_data) do
-		table.insert(ret, {
-			kind = v.kind,
-			type = lib.adapt_lsp_num_to_str(v.kind),
-			name = v.name,
-			icon = config.icons[v.kind],
-			scope = v.scope,
-		})
+	for i, v in ipairs(context_data) do
+		if i ~= 1 then
+			table.insert(ret, {
+				kind = v.kind,
+				type = lib.adapt_lsp_num_to_str(v.kind),
+				name = v.name,
+				icon = config.icons[v.kind],
+				scope = v.scope,
+			})
+		end
 	end
 
 	return ret

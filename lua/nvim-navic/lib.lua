@@ -37,7 +37,7 @@ end
 
 -- Construct tree structure based on scope information
 -- Could be inaccurate ?? Not intended to be used like this...
-local function symbolInfo_treemaker(symbols)
+local function symbolInfo_treemaker(symbols, root_node)
 	-- convert location to scope
 	for _, node in ipairs(symbols) do
 		node.scope = node.location.range
@@ -46,6 +46,8 @@ local function symbolInfo_treemaker(symbols)
 		node.location = nil
 
 		node.name_range = node.scope
+
+		node.containerName = nil
 	end
 
 	-- sort with repect to node height and location
@@ -60,23 +62,13 @@ local function symbolInfo_treemaker(symbols)
 	end)
 
 	-- root node
-	local tree = {
-		scope = {
-			start = {
-				line = -10,
-				character = 0,
-			},
-			["end"] = {
-				line = 2147483640,
-				character = 0,
-			},
-		},
-		children = {},
-	}
+	root_node.children = {}
+
 	local stack = {}
 
-	table.insert(tree.children, symbols[1])
-	table.insert(stack, tree)
+	table.insert(root_node.children, symbols[1])
+	symbols[1].parent = root_node
+	table.insert(stack, root_node)
 
 	-- build tree
 	for i = 2, #symbols, 1 do
@@ -90,76 +82,104 @@ local function symbolInfo_treemaker(symbols)
 				symbols[i - 1].children = {}
 			end
 			table.insert(symbols[i - 1].children, symbols[i])
+
+			symbols[i].parent = symbols[i-1]
 		elseif prev_chain_node_relation == "before" and stack_top_node_relation == "around" then
 			-- the previous symbol comes before this one and the current node
-			-- contains this symbol; add this symbol as a child of the current node
+			-- is child of stack_top node. Add this symbol as child of stack_top
 			table.insert(stack[#stack].children, symbols[i])
+
+			symbols[i].parent = stack[#stack]
+			symbols[i-1].next = symbols[i]
+			symbols[i].prev = symbols[i-1]
 		elseif stack_top_node_relation == "before" then
-			-- the current node comes before this symbol; pop nodes off the stack to
+			-- the stack_top node comes before this symbol; pop nodes off the stack to
 			-- find the parent of this symbol and add this symbol as its child
 			while symbol_relation(symbols[i], stack[#stack]) ~= "around" do
 				stack[#stack] = nil
 			end
 			table.insert(stack[#stack].children, symbols[i])
+
+			symbols[i].parent = stack[#stack]
 		end
 	end
-
-	return tree.children
 end
 
--- Process raw data from lsp server
-local function parse(symbols)
-	local parsed_symbols = {}
+local function dfs(curr_symbol_layer, parent_node)
+	parent_node.children = {}
 
-	local function dfs(curr_symbol)
-		local ret = {}
+	for index, val in ipairs(curr_symbol_layer) do
+		local scope = val.range
+		scope["start"].line = scope["start"].line + 1
+		scope["end"].line = scope["end"].line + 1
 
-		for index, val in ipairs(curr_symbol) do
-			local curr_parsed_symbol = {}
+		local name_range = val.selectionRange
+		name_range["start"].line = name_range["start"].line + 1
+		name_range["end"].line = name_range["end"].line + 1
 
-			local scope = val.range
-			scope["start"].line = scope["start"].line + 1
-			scope["end"].line = scope["end"].line + 1
+		local curr_parsed_symbol = {
+			name = val.name or "<???>",
+			scope = scope,
+			name_range = name_range,
+			kind = val.kind or 0,
+			index = index,
+			parent = parent_node
+		}
 
-			local name_range = val.selectionRange
-			name_range["start"].line = name_range["start"].line + 1
-			name_range["end"].line = name_range["end"].line + 1
-
-			curr_parsed_symbol = {
-				name = val.name or "<???>",
-				scope = scope,
-				name_range = name_range,
-				kind = val.kind or 0,
-				index = index,
-			}
-
-			if val.children then
-				curr_parsed_symbol.children = dfs(val.children)
-			end
-
-			ret[#ret + 1] = curr_parsed_symbol
+		if val.children then
+			dfs(val.children, curr_parsed_symbol)
 		end
 
-		if ret then
-			table.sort(ret, function(a, b)
-				if b.scope.start.line == a.scope.start.line then
-					return b.scope.start.character > a.scope.start.character
-				end
-				return b.scope.start.line > a.scope.start.line
-			end)
-		end
-
-		return ret
+		table.insert(parent_node.children, curr_parsed_symbol)
 	end
+
+	table.sort(parent_node.children, function(a, b)
+		if b.scope.start.line == a.scope.start.line then
+			return b.scope.start.character > a.scope.start.character
+		end
+		return b.scope.start.line > a.scope.start.line
+	end)
+
+	for i = 1, #parent_node.children, 1 do
+		parent_node.children[i].prev = parent_node.children[i-1]
+		parent_node.children[i].next = parent_node.children[i+1]
+	end
+end
+
+-- Process raw data from lsp server into Tree structure
+-- Node
+-- 	 * is_root    : boolean
+-- 	 * name       : string
+-- 	 * scope      : table { start = {line = ., character = .}, end = {line = ., character = .}}
+-- 	 * name_range : table same as scope
+-- 	 * kind       : int [1-26]
+-- 	 * index      : int, index among siblings
+-- 	 * parent     : pointer to parent node
+-- 	 * prev       : pointer to previous sibling node
+-- 	 * next       : pointer to next sibling node
+local function parse(symbols)
+	local root_node = {
+		is_root = true,
+		scope = {
+			start = {
+				line = -10,
+				character = 0,
+			},
+			["end"] = {
+				line = 2147483640,
+				character = 0,
+			},
+		}
+	}
 
 	-- detect type
 	if #symbols >= 1 and symbols[1].range == nil then
-		parsed_symbols = symbolInfo_treemaker(symbols)
+		symbolInfo_treemaker(symbols, root_node)
 	else
-		parsed_symbols = dfs(symbols)
+		dfs(symbols, root_node)
 	end
 
-	return parsed_symbols
+	return root_node
 end
 
 local function in_range(cursor_pos, range)
@@ -247,6 +267,11 @@ function M.update_context(for_buf)
 		return
 	end
 
+	-- Always keep root node
+	if curr.is_root then
+		table.insert(new_context_data, curr)
+	end
+
 	-- Find larger context that remained same
 	for _, context in ipairs(old_context_data) do
 		if curr == nil then
@@ -254,32 +279,32 @@ function M.update_context(for_buf)
 		end
 		if
 			in_range(cursor_pos, context.scope) == 0
-			and curr[context.index] ~= nil
-			and context.name == curr[context.index].name
-			and context.kind == curr[context.index].kind
+			and curr.children[context.index] ~= nil
+			and context.name == curr.children[context.index].name
+			and context.kind == curr.children[context.index].kind
 		then
-			table.insert(new_context_data, curr[context.index])
-			curr = curr[context.index].children
+			table.insert(new_context_data, curr.children[context.index])
+			curr = curr.children[context.index]
 		else
 			break
 		end
 	end
 
 	-- Fill out context_data
-	while curr ~= nil do
+	while curr.children ~= nil do
 		local go_deeper = false
 		local l = 1
-		local h = #curr
+		local h = #curr.children
 		while l <= h do
 			local m = bit.rshift(l + h, 1)
-			local comp = in_range(cursor_pos, curr[m].scope)
+			local comp = in_range(cursor_pos, curr.children[m].scope)
 			if comp == -1 then
 				h = m - 1
 			elseif comp == 1 then
 				l = m + 1
 			else
-				table.insert(new_context_data, curr[m])
-				curr = curr[m].children
+				table.insert(new_context_data, curr.children[m])
+				curr = curr.children[m]
 				go_deeper = true
 				break
 			end
