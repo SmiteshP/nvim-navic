@@ -235,7 +235,7 @@ end
 local navic_symbols = {}
 local navic_context_data = {}
 
-function M.get_symbols(bufnr)
+function M.get_tree(bufnr)
 	return navic_symbols[bufnr]
 end
 
