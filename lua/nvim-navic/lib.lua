@@ -103,12 +103,25 @@ local function symbolInfo_treemaker(symbols, root_node)
 			symbols[i].parent = stack[#stack]
 		end
 	end
+
+	function dfs_index(node)
+		if node.children == nil then
+			return
+		end
+
+		for i = 1, #node.children, 1 do
+			node.children[i].index = i
+			dfs_index(node.children[i])
+		end
+	end
+
+	dfs_index(root_node)
 end
 
 local function dfs(curr_symbol_layer, parent_node)
 	parent_node.children = {}
 
-	for index, val in ipairs(curr_symbol_layer) do
+	for _, val in ipairs(curr_symbol_layer) do
 		local scope = val.range
 		scope["start"].line = scope["start"].line + 1
 		scope["end"].line = scope["end"].line + 1
@@ -122,7 +135,6 @@ local function dfs(curr_symbol_layer, parent_node)
 			scope = scope,
 			name_range = name_range,
 			kind = val.kind or 0,
-			index = index,
 			parent = parent_node
 		}
 
@@ -143,6 +155,7 @@ local function dfs(curr_symbol_layer, parent_node)
 	for i = 1, #parent_node.children, 1 do
 		parent_node.children[i].prev = parent_node.children[i-1]
 		parent_node.children[i].next = parent_node.children[i+1]
+		parent_node.children[i].index = i
 	end
 end
 
@@ -160,6 +173,7 @@ end
 local function parse(symbols)
 	local root_node = {
 		is_root = true,
+		index = 1,
 		scope = {
 			start = {
 				line = -10,
