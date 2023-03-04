@@ -539,13 +539,13 @@ function M.attach(client, bufnr)
 	end
 
 	if vim.b[bufnr].navic_client_id ~= nil and vim.b[bufnr].navic_client_name ~= client.name then
-		local prev_client = vim.lsp.get_client_by_id(client.id)
+		local prev_client = vim.b[bufnr].navic_client_name
 		if not vim.g.navic_silence then
 			vim.notify(
 				"nvim-navic: Failed to attach to "
 					.. client.name
 					.. " for current buffer. Already attached to "
-					.. prev_client.name,
+					.. prev_client,
 				vim.log.levels.WARN
 			)
 		end
