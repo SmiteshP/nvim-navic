@@ -267,7 +267,7 @@ function M.update_data(for_buf, symbols)
 end
 
 function M.update_context(for_buf, arg_cursor_pos)
-	local cursor_pos = arg_cursor_pos == nil and arg_cursor_pos or vim.api.nvim_win_get_cursor(0)
+	local cursor_pos = arg_cursor_pos ~= nil and arg_cursor_pos or vim.api.nvim_win_get_cursor(0)
 
 	if navic_context_data[for_buf] == nil then
 		navic_context_data[for_buf] = {}
