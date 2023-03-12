@@ -159,43 +159,6 @@ local function dfs(curr_symbol_layer, parent_node)
 	end
 end
 
--- Process raw data from lsp server into Tree structure
--- Node
--- 	 * is_root    : boolean
--- 	 * name       : string
--- 	 * scope      : table { start = {line = ., character = .}, end = {line = ., character = .}}
--- 	 * name_range : table same as scope
--- 	 * kind       : int [1-26]
--- 	 * index      : int, index among siblings
--- 	 * parent     : pointer to parent node
--- 	 * prev       : pointer to previous sibling node
--- 	 * next       : pointer to next sibling node
-local function parse(symbols)
-	local root_node = {
-		is_root = true,
-		index = 1,
-		scope = {
-			start = {
-				line = -10,
-				character = 0,
-			},
-			["end"] = {
-				line = 2147483640,
-				character = 0,
-			},
-		}
-	}
-
-	-- detect type
-	if #symbols >= 1 and symbols[1].range == nil then
-		symbolInfo_treemaker(symbols, root_node)
-	else
-		dfs(symbols, root_node)
-	end
-
-	return root_node
-end
-
 local function in_range(cursor_pos, range)
 	-- -1 = behind
 	--  0 = in range
@@ -223,12 +186,59 @@ end
 
 local M = {}
 
+-- Process raw data from lsp server into Tree structure
+-- Node
+-- 	 * is_root    : boolean
+-- 	 * name       : string
+-- 	 * scope      : table { start = {line = ., character = .}, end = {line = ., character = .}}
+-- 	 * name_range : table same as scope
+-- 	 * kind       : int [1-26]
+-- 	 * index      : int, index among siblings
+-- 	 * parent     : pointer to parent node
+-- 	 * prev       : pointer to previous sibling node
+-- 	 * next       : pointer to next sibling node
+function M.parse(symbols)
+	local root_node = {
+		is_root = true,
+		index = 1,
+		scope = {
+			start = {
+				line = -10,
+				character = 0,
+			},
+			["end"] = {
+				line = 2147483640,
+				character = 0,
+			},
+		}
+	}
+
+	-- detect type
+	if #symbols >= 1 and symbols[1].range == nil then
+		symbolInfo_treemaker(symbols, root_node)
+	else
+		dfs(symbols, root_node)
+	end
+
+	return root_node
+end
+
 -- Make request to lsp server
-function M.request_symbol(for_buf, handler, client_id)
+function M.request_symbol(for_buf, handler, client_id, file_uri)
+	local textDocument_argument = vim.lsp.util.make_text_document_params()
+
+	if file_uri ~= nil then
+		textDocument_argument = {
+			textDocument = {
+				uri = file_uri
+			}
+		}
+	end
+
 	vim.lsp.buf_request_all(
 		for_buf,
 		"textDocument/documentSymbol",
-		{ textDocument = vim.lsp.util.make_text_document_params() },
+		{ textDocument = textDocument_argument },
 		function(symbols)
 			if symbols[client_id] == nil then
 				return
@@ -263,7 +273,7 @@ function M.clear_buffer_data(bufnr)
 end
 
 function M.update_data(for_buf, symbols)
-	navic_symbols[for_buf] = parse(symbols)
+	navic_symbols[for_buf] = M.parse(symbols)
 end
 
 function M.update_context(for_buf, arg_cursor_pos)
