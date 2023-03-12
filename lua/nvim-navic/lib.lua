@@ -104,7 +104,7 @@ local function symbolInfo_treemaker(symbols, root_node)
 		end
 	end
 
-	function dfs_index(node)
+	local function dfs_index(node)
 		if node.children == nil then
 			return
 		end
