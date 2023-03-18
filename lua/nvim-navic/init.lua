@@ -439,7 +439,7 @@ function M.is_available(bufnr)
 	return vim.b[bufnr].navic_client_id ~= nil
 end
 
-function M.get_location(opts)
+function M.get_location(opts, bufnr)
 	local local_config = {}
 
 	if opts ~= nil then
@@ -472,7 +472,7 @@ function M.get_location(opts)
 		local_config = config
 	end
 
-	local data = M.get_data()
+	local data = M.get_data(bufnr)
 
 	if data == nil then
 		return ""
