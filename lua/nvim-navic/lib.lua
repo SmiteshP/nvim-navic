@@ -90,8 +90,6 @@ local function symbolInfo_treemaker(symbols, root_node)
 			table.insert(stack[#stack].children, symbols[i])
 
 			symbols[i].parent = stack[#stack]
-			symbols[i-1].next = symbols[i]
-			symbols[i].prev = symbols[i-1]
 		elseif stack_top_node_relation == "before" then
 			-- the stack_top node comes before this symbol; pop nodes off the stack to
 			-- find the parent of this symbol and add this symbol as its child
@@ -112,6 +110,23 @@ local function symbolInfo_treemaker(symbols, root_node)
 		for i = 1, #node.children, 1 do
 			node.children[i].index = i
 			dfs_index(node.children[i])
+		end
+
+		-- Set next, prev relations
+		for i = 1, #node.children, 1 do
+			local curr_node = node.children[i]
+
+			if i ~= 1 then
+				local prev_node = node.children[i-1]
+				prev_node.next = curr_node
+				curr_node.prev = prev_node
+			end
+
+			if node.children[i+1] ~= nil then
+				local next_node = node.children[i+1]
+				next_node.prev = curr_node
+				curr_node.next = next_node
+			end
 		end
 	end
 
