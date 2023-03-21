@@ -34,11 +34,13 @@ API                                                                 *navic-api*
 	'bufnr' is optional argument. If bufnr is not provied, current open
 	buffer is used.
 
-*navic.get_location* (opts)
+*navic.get_location* (opts, bufnr)
 	Returns a pretty string that shows code context and can be used directly
 	in statusline or winbar.
 	opts table can be passed to override any of |nvim-navic|'s options.
-	Follows same table format as *navic-setup*|'s opts table.
+    Follows same table format as *navic-setup*|'s opts table. You can pass
+    |bufnr| value to determine which buffer is used to get code context. If
+    not provided, the current buffer will be used.
 
 *navic.get_data* (bufnr)
 	Returns a table of tables representing the current code context. Contains
