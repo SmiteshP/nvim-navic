@@ -5,6 +5,8 @@ Named after the Indian satellite navigation system.
 
 ![2022-06-11 17-02-33](https://user-images.githubusercontent.com/43147494/173186210-c8d689ad-1f8a-43cf-8125-127c7bd5be35.gif)
 
+>You might also be interested in [nvim-navbuddy](https://github.com/SmiteshP/nvim-navbuddy). Paired with nvim-navic, it will give you complete breadcrumbs experience like in an IDE!
+
 ## ⚡️ Requirements
 
 * Neovim >= 0.7.0
