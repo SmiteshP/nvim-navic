@@ -134,6 +134,10 @@ local function symbolInfo_treemaker(symbols, root_node)
 end
 
 local function dfs(curr_symbol_layer, parent_node)
+	if #curr_symbol_layer == 0 then
+		return
+	end
+
 	parent_node.children = {}
 
 	for _, val in ipairs(curr_symbol_layer) do
