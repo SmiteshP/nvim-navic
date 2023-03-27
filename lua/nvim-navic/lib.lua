@@ -322,6 +322,7 @@ function M.update_context(for_buf, arg_cursor_pos)
 		end
 		if
 			in_range(cursor_pos, context.scope) == 0
+			and curr.children ~= nil
 			and curr.children[context.index] ~= nil
 			and context.name == curr.children[context.index].name
 			and context.kind == curr.children[context.index].kind
