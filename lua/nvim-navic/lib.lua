@@ -261,7 +261,7 @@ function M.request_symbol(for_buf, handler, client_id, file_uri)
 		function(symbols)
 			if symbols[client_id] == nil then
 				return
-			elseif symbols[client_id].error then
+			elseif symbols[client_id].error ~= nil or symbols[client_id].result == nil then
 				vim.defer_fn(function()
 					M.request_symbol(for_buf, handler, client_id)
 				end, 750)
