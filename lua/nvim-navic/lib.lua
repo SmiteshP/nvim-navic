@@ -267,7 +267,6 @@ function M.request_symbol(for_buf, handler, client_id, file_uri)
 				end, 750)
 			elseif symbols[client_id].result ~= nil then
 				if vim.api.nvim_buf_is_valid(for_buf) then
-					vim.b[for_buf].navic_awaiting_lsp_response = false
 					handler(for_buf, symbols[client_id].result)
 				end
 			end

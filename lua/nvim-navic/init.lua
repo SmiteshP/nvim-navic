@@ -196,6 +196,12 @@ function M.get_location(opts, bufnr)
 	return ret
 end
 
+local awaiting_lsp_response = {}
+local function lsp_callback(for_buf, symbols)
+	awaiting_lsp_response[for_buf] = false
+	lib.update_data(for_buf, symbols)
+end
+
 function M.attach(client, bufnr)
 	if not client.server_capabilities.documentSymbolProvider then
 		if not vim.g.navic_silence then
@@ -232,10 +238,10 @@ function M.attach(client, bufnr)
 	})
 	vim.api.nvim_create_autocmd({ "InsertLeave", "BufEnter", "CursorHold" }, {
 		callback = function()
-			if not vim.b.navic_awaiting_lsp_response and changedtick < vim.b.changedtick then
-				vim.b.navic_awaiting_lsp_response = true
-				changedtick = vim.b.changedtick
-				lib.request_symbol(bufnr, lib.update_data, client.id)
+			if not awaiting_lsp_response[bufnr] and changedtick < vim.b[bufnr].changedtick then
+				awaiting_lsp_response[bufnr] = true
+				changedtick = vim.b[bufnr].changedtick
+				lib.request_symbol(bufnr, lsp_callback, client.id)
 			end
 		end,
 		group = navic_augroup,
@@ -267,7 +273,7 @@ function M.attach(client, bufnr)
 
 	-- First call
 	vim.b[bufnr].navic_awaiting_lsp_response = true
-	lib.request_symbol(bufnr, lib.update_data, client.id)
+	lib.request_symbol(bufnr, lsp_callback, client.id)
 end
 
 return M
