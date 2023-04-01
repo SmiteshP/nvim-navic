@@ -54,7 +54,8 @@ API                                                                 *navic-api*
 Usage                                                             *navic-usage*
 
 |nvim-navic| needs to be attached to lsp servers of the buffer to work. Use the
-|navic.attach| function while setting up lsp servers.
+|navic.attach| function while setting up lsp servers. You can skip this step
+if you have enabled auto_attach option during setup.
 
 NOTE: You can attach to only one lsp server per buffer.
 
@@ -161,6 +162,19 @@ Use |navic.setup| to override any of the default options
 	safe_output: boolean
 		Sanitize the output for use in statusline and winbar.
 
+	lsp :
+		auto_attach: boolean
+			Enable to have nvim-navic automatically attach to every LSP for
+			current buffer. Its disabled by default.
+		preference: table
+			Table ranking lsp_servers. Lower the index, higher the priority of
+			the server. If there are more than one server attached to a
+			buffer, nvim-navic will refer to this list to make a decision on
+			which one to use.
+			For example - In case a buffer is attached to clangd and ccls both
+			and the preference list is `{ "clangd", "pyright" }`. Then clangd
+			will be preferred.
+
 Defaults >
 	navic.setup {
 		icons = {
@@ -190,6 +204,10 @@ Defaults >
 			Event         = " ",
 			Operator      = " ",
 			TypeParameter = " ",
+		},
+		lsp = {
+			auto_attach = false,
+			preference = nil,
 		},
 		highlight = false,
 		separator = " > ",
