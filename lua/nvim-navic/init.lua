@@ -39,6 +39,10 @@ local config = {
 	depth_limit = 0,
 	depth_limit_indicator = "..",
 	safe_output = true,
+	lsp = {
+		auto_attach = false,
+		preference = nil
+	}
 }
 
 setmetatable(config.icons, {
@@ -60,7 +64,7 @@ local function setup_auto_attach(opts)
 				return M.attach(client, args.buf)
 			end
 
-			if not opts.preference then
+			if not opts.lsp.preference then
 				return vim.notify(
 					"nvim-navic: Trying to attach "
 						.. client.name
@@ -71,7 +75,7 @@ local function setup_auto_attach(opts)
 				)
 			end
 
-			for _, preferred_lsp in ipairs(opts.preference) do
+			for _, preferred_lsp in ipairs(opts.lsp.preference) do
 				-- If new client comes first, then remove the previous
 				-- attached server and attatch the new one
 				if preferred_lsp == client.name then
@@ -93,7 +97,7 @@ function M.setup(opts)
 		return
 	end
 
-	if opts.auto_attach then
+	if opts.lsp ~= nil and opts.lsp.auto_attach then
 		setup_auto_attach(opts)
 	end
 
