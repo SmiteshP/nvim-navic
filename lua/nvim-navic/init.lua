@@ -47,9 +47,54 @@ setmetatable(config.icons, {
 	end,
 })
 
+local function setup_auto_attach(opts)
+	vim.api.nvim_create_autocmd("LspAttach", {
+		callback = function(args)
+			local client = vim.lsp.get_client_by_id(args.data.client_id)
+			if not client.server_capabilities.documentSymbolProvider then
+				return
+			end
+
+			local prev_client = vim.b[args.buf].navic_client_name
+			if not prev_client or prev_client == client.name then
+				return M.attach(client, args.buf)
+			end
+
+			if not opts.preference then
+				return vim.notify(
+					"nvim-navic: Trying to attach "
+						.. client.name
+						.. " for current buffer. Already attached to "
+						.. prev_client
+						.. ". Please use the preference option to set a higher preference for one of the servers",
+					vim.log.levels.WARN
+				)
+			end
+
+			for _, preferred_lsp in ipairs(opts.preference) do
+				-- If new client comes first, then remove the previous
+				-- attached server and attatch the new one
+				if preferred_lsp == client.name then
+					vim.b[args.buf].navic_client_id = nil
+					vim.b[args.buf].navic_client_name = nil
+					return M.attach(client, args.buf)
+				elseif preferred_lsp == prev_client then
+					-- If the previous attached server comes first, it
+					-- has higher priority over the one trying to attach
+					return
+				end
+			end
+		end,
+	})
+end
+
 function M.setup(opts)
 	if opts == nil then
 		return
+	end
+
+	if opts.auto_attach then
+		setup_auto_attach(opts)
 	end
 
 	if opts.icons ~= nil then
