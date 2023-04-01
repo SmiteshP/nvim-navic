@@ -241,7 +241,7 @@ function M.attach(client, bufnr)
 			if not awaiting_lsp_response[bufnr] and changedtick < vim.b[bufnr].changedtick then
 				awaiting_lsp_response[bufnr] = true
 				changedtick = vim.b[bufnr].changedtick
-				lib.request_symbol(bufnr, lsp_callback, client.id)
+				lib.request_symbol(bufnr, lsp_callback, client)
 			end
 		end,
 		group = navic_augroup,
@@ -273,7 +273,7 @@ function M.attach(client, bufnr)
 
 	-- First call
 	vim.b[bufnr].navic_awaiting_lsp_response = true
-	lib.request_symbol(bufnr, lsp_callback, client.id)
+	lib.request_symbol(bufnr, lsp_callback, client)
 end
 
 return M

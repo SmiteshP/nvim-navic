@@ -243,7 +243,7 @@ function M.parse(symbols)
 end
 
 -- Make request to lsp server
-function M.request_symbol(for_buf, handler, client_id, file_uri)
+function M.request_symbol(for_buf, handler, client, file_uri)
 	local textDocument_argument = vim.lsp.util.make_text_document_params()
 
 	if file_uri ~= nil then
@@ -254,24 +254,17 @@ function M.request_symbol(for_buf, handler, client_id, file_uri)
 		}
 	end
 
-	vim.lsp.buf_request_all(
-		for_buf,
-		"textDocument/documentSymbol",
-		{ textDocument = textDocument_argument },
-		function(symbols)
-			if symbols[client_id] == nil then
-				return
-			elseif symbols[client_id].error ~= nil or symbols[client_id].result == nil then
-				vim.defer_fn(function()
-					M.request_symbol(for_buf, handler, client_id)
-				end, 750)
-			elseif symbols[client_id].result ~= nil then
-				if vim.api.nvim_buf_is_valid(for_buf) then
-					handler(for_buf, symbols[client_id].result)
-				end
+	client.request("textDocument/documentSymbol", { textDocument = textDocument_argument }, function(err, symbols, _)
+		if err ~= nil or symbols == nil then
+			vim.defer_fn(function()
+				M.request_symbol(for_buf, handler, client)
+			end, 750)
+		elseif symbols ~= nil then
+			if vim.api.nvim_buf_is_valid(for_buf) then
+				handler(for_buf, symbols)
 			end
 		end
-	)
+	end, for_buf)
 end
 
 local navic_symbols = {}
