@@ -34,7 +34,7 @@ Plug "SmiteshP/nvim-navic"
 
 ## ⚙️ Setup
 
-For nvim-navic to work, it needs attach to the lsp server. You can pass the nvim-navic's `attach` function as `on_attach` while setting up the lsp server.
+For nvim-navic to work, it needs attach to the lsp server. You can pass the nvim-navic's `attach` function as `on_attach` while setting up the lsp server. You can skip this step if you have enabled auto_attach option during setup.
 
 Note: nvim-navic can attach to only one server per buffer.
 
@@ -79,6 +79,10 @@ Use the `setup` function to modify default parameters.
 * `depth_limit` : Maximum depth of context to be shown. If the context hits this depth limit, it is truncated.
 * `depth_limit_indicator` : Icon to indicate that `depth_limit` was hit and the shown context is truncated.
 * `safe_output` : Sanitize the output for use in statusline and winbar.
+* `lsp` :
+    * `auto_attach` : Enable to have nvim-navic automatically attach to every LSP for current buffer. Its disabled by default.
+    * `preference` : Table ranking lsp_servers. Lower the index, higher the priority of the server. If there are more than one server attached to a buffer, nvim-navic will refer to this list to make a decision on which one to use.
+			For example - In case a buffer is attached to clangd and ccls both and the preference list is `{ "clangd", "pyright" }`. Then clangd will be preferred.
 
 ```lua
 navic.setup {
@@ -109,6 +113,10 @@ navic.setup {
         Event         = " ",
         Operator      = " ",
         TypeParameter = " ",
+    },
+    lsp = {
+        auto_attach = false,
+        preference = nil,
     },
     highlight = false,
     separator = " > ",
