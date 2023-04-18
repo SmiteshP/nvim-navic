@@ -152,7 +152,7 @@ Use |navic.setup| to override any of the default options
 	separator: string
 		Icon to be used to separate two symbols.
 
-	depth: integer
+	depth_limit: integer
 		Maximum depth of context to be shown. If the context depth exceeds
 		this parameter, context information is truncated. default is infinite
 
