@@ -39,6 +39,7 @@ local config = {
 	depth_limit = 0,
 	depth_limit_indicator = "..",
 	safe_output = true,
+	click = true,
 	lsp = {
 		auto_attach = false,
 		preference = nil
@@ -186,6 +187,9 @@ function M.get_location(opts, bufnr)
 		if opts.safe_output ~= nil then
 			local_config.safe_output = opts.safe_output
 		end
+		if opts.click ~= nil then
+			local_config.click = opts.click
+		end
 	else
 		local_config = config
 	end
@@ -208,7 +212,32 @@ function M.get_location(opts, bufnr)
 			.. "%*"
 	end
 
-	for _, v in ipairs(data) do
+	if local_config.click then
+		_G.navic_click_handler = function(minwid, cnt, _, _)
+			vim.api.nvim_win_set_cursor(0, {
+				data[minwid].scope["start"].line,
+				data[minwid].scope["start"].character
+			})
+			if cnt >= 1 then
+				local ok, navbuddy = pcall(require, "nvim-navbuddy")
+				if ok then
+					navbuddy.open(bufnr)
+				else
+					vim.notify("nvim-navic: Left click requires nvim-navbuddy to be installed.", vim.log.levels.WARN)
+				end
+			end
+		end
+	end
+
+	local function add_click(level, component)
+		return "%"
+			.. level
+			.. "@v:lua.navic_click_handler@"
+			.. component
+			.. "%X"
+	end
+
+	for i, v in ipairs(data) do
 		local name = ""
 
 		if local_config.safe_output then
@@ -218,11 +247,19 @@ function M.get_location(opts, bufnr)
 			name = v.name
 		end
 
+		local component
+
 		if local_config.highlight then
-			table.insert(location, add_hl(v.kind, name))
+			component = add_hl(v.kind, name)
 		else
-			table.insert(location, v.icon .. name)
+			component = v.icon .. name
 		end
+
+		if local_config.click then
+			component = add_click(i, component)
+		end
+
+		table.insert(location, component)
 	end
 
 	if local_config.depth_limit ~= 0 and #location > local_config.depth_limit then
