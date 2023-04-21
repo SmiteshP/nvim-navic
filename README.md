@@ -270,6 +270,30 @@ local navic = require("nvim-navic")
 
 require("lualine").setup({
     sections = {
+        lualine_c = { "navic" }
+    },
+    -- OR in winbar
+    winbar = {
+        lualine_c = { "navic" }
+    }
+})
+
+-- OR a more hands on approach
+require("lualine").setup({
+    sections = {
+        lualine_c = {
+            { 
+              function()
+                  return navic.get_location()
+              end, 
+              cond = function() 
+                  return navic.is_available()
+              end
+            },
+        }
+    },
+    -- OR in winbar
+    winbar = {
         lualine_c = {
             { 
               function()
