@@ -82,8 +82,7 @@ Use the `setup` function to modify default parameters.
 * `click` : Single click to goto element, double click to open nvim-navbuddy on the clicked element.
 * `lsp` :
     * `auto_attach` : Enable to have nvim-navic automatically attach to every LSP for current buffer. Its disabled by default.
-    * `preference` : Table ranking lsp_servers. Lower the index, higher the priority of the server. If there are more than one server attached to a buffer, nvim-navic will refer to this list to make a decision on which one to use.
-			For example - In case a buffer is attached to clangd and ccls both and the preference list is `{ "clangd", "pyright" }`. Then clangd will be preferred.
+    * `preference` : Table ranking lsp_servers. Lower the index, higher the priority of the server. If there are more than one server attached to a buffer, nvim-navic will refer to this list to make a decision on which one to use. For example - In case a buffer is attached to clangd and ccls both and the preference list is `{ "clangd", "pyright" }`. Then clangd will be preferred.
 
 ```lua
 navic.setup {
@@ -133,7 +132,7 @@ For highlights to work, highlight groups must be defined. These may be defined i
 
 <details>
 <summary>Example highlight definitions</summary>
-	
+
 ```lua
 vim.api.nvim_set_hl(0, "NavicIconsFile",          {default = true, bg = "#000000", fg = "#ffffff"})
 vim.api.nvim_set_hl(0, "NavicIconsModule",        {default = true, bg = "#000000", fg = "#ffffff"})
@@ -270,11 +269,27 @@ local navic = require("nvim-navic")
 
 require("lualine").setup({
     sections = {
-        lualine_c = { "navic" }
+        lualine_c = {
+            "navic",
+
+            -- Component specific options
+            color_correction = nil, -- Can be nil, "static" or "dynamic". This option is useful only when you have highlights enabled.
+                                    -- Many colorschemes don't define same backgroud for nvim-navic as their lualine statusline backgroud.
+                                    -- Setting it to "static" will perform a adjustment once when the component is being setup. This should
+                                    --   be enough when the lualine section isn't changing colors based on the mode.
+                                    -- Setting it to "dynamic" will keep updating the highlights according to the current modes colors for
+                                    --   the current section.
+
+            navic_opts = nil  -- lua table with same format as setup's option. All options except "lsp" options take effect when set here.
+        }
     },
     -- OR in winbar
     winbar = {
-        lualine_c = { "navic" }
+        lualine_c = {
+            "navic",
+            color_correction = nil,
+            navic_opts = nil
+        }
     }
 })
 
@@ -282,11 +297,11 @@ require("lualine").setup({
 require("lualine").setup({
     sections = {
         lualine_c = {
-            { 
+            {
               function()
                   return navic.get_location()
-              end, 
-              cond = function() 
+              end,
+              cond = function()
                   return navic.is_available()
               end
             },
@@ -295,11 +310,11 @@ require("lualine").setup({
     -- OR in winbar
     winbar = {
         lualine_c = {
-            { 
+            {
               function()
                   return navic.get_location()
-              end, 
-              cond = function() 
+              end,
+              cond = function()
                   return navic.is_available()
               end
             },
@@ -308,7 +323,7 @@ require("lualine").setup({
 })
 ```
 </details>
-	
+
 ### [galaxyline](https://github.com/glepnir/galaxyline.nvim)
 
 <details>
