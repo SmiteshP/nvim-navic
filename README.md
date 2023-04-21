@@ -79,6 +79,7 @@ Use the `setup` function to modify default parameters.
 * `depth_limit` : Maximum depth of context to be shown. If the context hits this depth limit, it is truncated.
 * `depth_limit_indicator` : Icon to indicate that `depth_limit` was hit and the shown context is truncated.
 * `safe_output` : Sanitize the output for use in statusline and winbar.
+* `click` : Single click to goto element, double click to open nvim-navbuddy on the clicked element.
 * `lsp` :
     * `auto_attach` : Enable to have nvim-navic automatically attach to every LSP for current buffer. Its disabled by default.
     * `preference` : Table ranking lsp_servers. Lower the index, higher the priority of the server. If there are more than one server attached to a buffer, nvim-navic will refer to this list to make a decision on which one to use.
@@ -122,7 +123,8 @@ navic.setup {
     separator = " > ",
     depth_limit = 0,
     depth_limit_indicator = "..",
-    safe_output = true
+    safe_output = true,
+    click = false
 }
 
 ```

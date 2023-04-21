@@ -161,6 +161,10 @@ Use |navic.setup| to override any of the default options
 
 	safe_output: boolean
 		Sanitize the output for use in statusline and winbar.
+	
+	click: boolean
+		Single click to goto element, double click to open nvim-navbuddy on
+		the clicked element.
 
 	lsp :
 		auto_attach: boolean
@@ -214,6 +218,7 @@ Defaults >
 		depth_limit = 0,
 		depth_limit_indicator = "..",
 		safe_output = true,
+		click = false
 	}
 <
 
