@@ -212,7 +212,7 @@ nvim-navic does not alter your statusline or winbar on its own. Instead, you are
 * `get_location(opts, bufnr)`  : Returns a pretty string with context information. Using `opts` table you can override any of the options, format same as the table for `setup` function. You can also provide a `bufnr` value to determine which buffer is used to get the code context information, if not provided the current buffer will be used.
 
 <details>
-<summary>Examples</summary>
+<summary><h3>Examples</h3></summary>
 
 ### Native method
 
