@@ -214,6 +214,7 @@ function M.get_location(opts, bufnr)
 
 	if local_config.click then
 		_G.navic_click_handler = function(minwid, cnt, _, _)
+			vim.cmd("normal! m'")
 			vim.api.nvim_win_set_cursor(0, {
 				data[minwid].scope["start"].line,
 				data[minwid].scope["start"].character
