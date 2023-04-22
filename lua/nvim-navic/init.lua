@@ -218,7 +218,7 @@ function M.get_location(opts, bufnr)
 				data[minwid].scope["start"].line,
 				data[minwid].scope["start"].character
 			})
-			if cnt >= 1 then
+			if cnt > 1 then
 				local ok, navbuddy = pcall(require, "nvim-navbuddy")
 				if ok then
 					navbuddy.open(bufnr)
