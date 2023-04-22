@@ -59,7 +59,7 @@ if you have enabled auto_attach option during setup.
 
 NOTE: You can attach to only one lsp server per buffer.
 
-Example: >
+Example: >lua
 	require("lspconfig").clangd.setup {
 		on_attach = function(client, bufnr)
 			navic.attach(client, bufnr)
@@ -70,9 +70,69 @@ Example: >
 Next you can use |nvim-navic| in your statusline or winbar with your
 favorite statusline/winbar plugins.
 
+Example setup with lualine.nvim `https://github.com/nvim-lualine/lualine.nvim`:
+>lua
+	local navic = require("nvim-navic")
+
+	require("lualine").setup({
+		sections = {
+			lualine_c = {
+				"navic",
+
+				-- Component specific options
+				color_correction = nil, -- Can be nil, "static" or "dynamic". This option is useful only when you have highlights enabled.
+										-- Many colorschemes don't define same backgroud for nvim-navic as their lualine statusline backgroud.
+										-- Setting it to "static" will perform a adjustment once when the component is being setup. This should
+										--	 be enough when the lualine section isn't changing colors based on the mode.
+										-- Setting it to "dynamic" will keep updating the highlights according to the current modes colors for
+										--	 the current section.
+
+				navic_opts = nil  -- lua table with same format as setup's option. All options except "lsp" options take effect when set here.
+			}
+		},
+		-- OR in winbar
+		winbar = {
+			lualine_c = {
+				"navic",
+				color_correction = nil,
+				navic_opts = nil
+			}
+		}
+	})
+
+	-- OR a more hands on approach
+	require("lualine").setup({
+		sections = {
+			lualine_c = {
+				{
+				  function()
+					  return navic.get_location()
+				  end,
+				  cond = function()
+					  return navic.is_available()
+				  end
+				},
+			}
+		},
+		-- OR in winbar
+		winbar = {
+			lualine_c = {
+				{
+				  function()
+					  return navic.get_location()
+				  end,
+				  cond = function()
+					  return navic.is_available()
+				  end
+				},
+			}
+		}
+	})
+<
+
 Example setup with feline.nvim `https://github.com/feline-nvim/feline.nvim`:
 
-Statusline: >
+Statusline: >lua
 	local navic = require("nvim-navic")
 
 	local components = {
@@ -91,7 +151,7 @@ Statusline: >
 	})
 <
 
-Winbar: >
+Winbar: >lua
 	local navic = require("nvim-navic")
 
 	local components = {
@@ -111,7 +171,7 @@ Winbar: >
 <
 
 You can silence warning/error messages thrown by |nvim-navic| by setting
->
+>lua
 	vim.g.navic_silence = true.
 <
 at the start of your config. However this is not advisable, the error
@@ -126,7 +186,7 @@ Set it to true to silence the any warnings/error messages thrown by nvim-navic
 *vim.b.navic_lazy_update_context*
 Set it to true to update context only on CursorHold event. Could be usefull if
 you are facing performance issues on large files. Example usage
->
+>lua
 	vim.api.nvim_create_autocmd("BufEnter", {
 		callback = function()
 			if vim.api.nvim_buf_line_count(0) > 10000 then
@@ -179,7 +239,7 @@ Use |navic.setup| to override any of the default options
 			and the preference list is `{ "clangd", "pyright" }`. Then clangd
 			will be preferred.
 
-Defaults >
+Defaults >lua
 	navic.setup {
 		icons = {
 			File          = " ",
