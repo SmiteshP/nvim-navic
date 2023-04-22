@@ -39,7 +39,7 @@ local config = {
 	depth_limit = 0,
 	depth_limit_indicator = "..",
 	safe_output = true,
-	click = true,
+	click = false,
 	lsp = {
 		auto_attach = false,
 		preference = nil
@@ -223,7 +223,7 @@ function M.get_location(opts, bufnr)
 				if ok then
 					navbuddy.open(bufnr)
 				else
-					vim.notify("nvim-navic: Left click requires nvim-navbuddy to be installed.", vim.log.levels.WARN)
+					vim.notify("nvim-navic: Double click requires nvim-navbuddy to be installed.", vim.log.levels.WARN)
 				end
 			end
 		end
