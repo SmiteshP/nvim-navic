@@ -288,6 +288,7 @@ Highlight                                                    *navic-highlights*
 |nvim-navic| provides the following highlights which get used when highlight
 option is set to `true`.
 
+	`NavicIcon`
 	`NavicIconsFile`
 	`NavicIconsModule`
 	`NavicIconsNamespace`
@@ -316,6 +317,10 @@ option is set to `true`.
 	`NavicIconsTypeParameter`
 	`NavicText`
 	`NavicSeparator`
+
+The `NavicIcons*` groups all link to `NavicIcon` by default.  Set `NavicIcon`
+to change the highlight for all icons together, then override individual
+`NavicIcons*` groups with specific highlights.
 
 =============================================================================
 vim:tw=78:ts=4:ft=help:norl:

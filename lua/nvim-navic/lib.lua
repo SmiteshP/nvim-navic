@@ -431,4 +431,10 @@ function M.adapt_lsp_num_to_str(n)
 	return lsp_num_to_str[n]
 end
 
+vim.api.nvim_set_hl(0, 'NavicIcon', {default = true, link = 'StatusLine'})
+for kind in pairs(lsp_str_to_num) do
+	local hlgroup = string.format('NavicIcons%s', kind)
+	vim.api.nvim_set_hl(0, hlgroup, {default = true, link = 'NavicIcon'})
+end
+
 return M
