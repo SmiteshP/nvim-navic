@@ -42,8 +42,8 @@ local config = {
 	click = false,
 	lsp = {
 		auto_attach = false,
-		preference = nil
-	}
+		preference = nil,
+	},
 }
 
 setmetatable(config.icons, {
@@ -217,7 +217,7 @@ function M.get_location(opts, bufnr)
 			vim.cmd("normal! m'")
 			vim.api.nvim_win_set_cursor(0, {
 				data[minwid].scope["start"].line,
-				data[minwid].scope["start"].character
+				data[minwid].scope["start"].character,
 			})
 			if cnt > 1 then
 				local ok, navbuddy = pcall(require, "nvim-navbuddy")
@@ -231,11 +231,7 @@ function M.get_location(opts, bufnr)
 	end
 
 	local function add_click(level, component)
-		return "%"
-			.. level
-			.. "@v:lua.navic_click_handler@"
-			.. component
-			.. "%X"
+		return "%" .. level .. "@v:lua.navic_click_handler@" .. component .. "%X"
 	end
 
 	for i, v in ipairs(data) do
@@ -273,6 +269,14 @@ function M.get_location(opts, bufnr)
 	end
 
 	local ret = ""
+
+	if opts.reverse_order then
+		local reverse = {}
+		for i = #location, 1, -1 do
+			reverse[#reverse + 1] = location[i]
+		end
+		location = reverse
+	end
 
 	if local_config.highlight then
 		ret = table.concat(location, "%#NavicSeparator#" .. local_config.separator .. "%*")
