@@ -68,7 +68,7 @@ require("lspconfig").clangd.setup {
 
 >NOTE: You can set `vim.g.navic_silence = true` to supress error messages thrown by nvim-navic. However this is not recommended as the error messages indicate that there is problem in your setup. That is, you are attaching nvim-navic to servers that don't support documentSymbol or are attaching navic to multiple servers for a single buffer.
 
->NOTE: You can set `vim.b.navic_lazy_update_context = true` for specific buffers, where you want the the updates to not occur on every `CursorMoved` event. It should help if you are facing performance issues in large files. Read the docs for example usage of this variable. Alternatively, you can pass `lazy_update_context=true` to the `setup` function to turn off updates on the "CursorMoved" event completely.
+>NOTE: You can set `vim.b.navic_lazy_update_context = true` for specific buffers, where you want the the updates to not occur on every `CursorMoved` event. It should help if you are facing performance issues in large files. Read the docs for example usage of this variable. Alternatively, you can pass `lazy_update_context=true` to the `setup` function to turn off updates on the `CursorMoved` event completely.
 
 ## 🪄 Customise
 
