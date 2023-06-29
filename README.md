@@ -68,7 +68,7 @@ require("lspconfig").clangd.setup {
 
 >NOTE: You can set `vim.g.navic_silence = true` to supress error messages thrown by nvim-navic. However this is not recommended as the error messages indicate that there is problem in your setup. That is, you are attaching nvim-navic to servers that don't support documentSymbol or are attaching navic to multiple servers for a single buffer.
 
->NOTE: You can set `vim.b.navic_lazy_update_context = true` for specific buffers, where you want the the updates to not occur on every `CursorMoved` event. It should help if you are facing performance issues in large files. Read the docs for example usage of this variable.
+>NOTE: You can set `vim.b.navic_lazy_update_context = true` for specific buffers, where you want the the updates to not occur on every `CursorMoved` event. It should help if you are facing performance issues in large files. Read the docs for example usage of this variable. Alternatively, you can pass `lazy_update_context=true` to the `setup` function to turn off updates on the "CursorMoved" event completely.
 
 ## 🪄 Customise
 
@@ -78,6 +78,7 @@ Use the `setup` function to modify default parameters.
 * `highlight` : If set to true, will add colors to icons and text as defined by highlight groups `NavicIcons*` (`NavicIconsFile`, `NavicIconsModule`.. etc.), `NavicText` and `NavicSeparator`.
 * `depth_limit` : Maximum depth of context to be shown. If the context hits this depth limit, it is truncated.
 * `depth_limit_indicator` : Icon to indicate that `depth_limit` was hit and the shown context is truncated.
+* `lazy_update_context` : If true, turns off context updates for the "CursorMoved" event.
 * `safe_output` : Sanitize the output for use in statusline and winbar.
 * `click` : Single click to goto element, double click to open nvim-navbuddy on the clicked element.
 * `lsp` :
@@ -123,6 +124,7 @@ navic.setup {
     depth_limit = 0,
     depth_limit_indicator = "..",
     safe_output = true,
+    lazy_update_context = false,
     click = false
 }
 
