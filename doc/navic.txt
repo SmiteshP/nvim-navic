@@ -227,7 +227,14 @@ Use |navic.setup| to override any of the default options
 		the clicked element.
 	
 	lazy_update_context: boolean
-		If true, turns off context updates for the "CursorMoved" event.
+		If true, turns off context updates for the "CursorMoved" event,
+		updates will only happen on the "CursorHold" event. The
+		difference between this option and the vim.b.navic_lazy_update_context
+		variable is that this option turns off context updates on the
+		"CursorMoved" completely for all buffers, whereas the
+		vim.b.navic_lazy_update_context variable allows you to control that
+		behavior with more flexibility, like disabling context updates
+		depending on file size, total lines etc.
 
 	lsp :
 		auto_attach: boolean
