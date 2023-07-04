@@ -39,6 +39,7 @@ local config = {
 	depth_limit = 0,
 	depth_limit_indicator = "..",
 	safe_output = true,
+	lazy_update_context = false,
 	click = false,
 	lsp = {
 		auto_attach = false,
@@ -124,6 +125,9 @@ function M.setup(opts)
 	end
 	if opts.safe_output ~= nil then
 		config.safe_output = opts.safe_output
+	end
+	if opts.lazy_update_context then
+		config.lazy_update_context = opts.lazy_update_context
 	end
 end
 
@@ -341,15 +345,17 @@ function M.attach(client, bufnr)
 		group = navic_augroup,
 		buffer = bufnr,
 	})
-	vim.api.nvim_create_autocmd("CursorMoved", {
-		callback = function()
-			if vim.b.navic_lazy_update_context ~= true then
-				lib.update_context(bufnr)
-			end
-		end,
-		group = navic_augroup,
-		buffer = bufnr,
-	})
+	if not config.lazy_update_context then
+		vim.api.nvim_create_autocmd("CursorMoved", {
+			callback = function()
+				if vim.b.navic_lazy_update_context ~= true then
+					lib.update_context(bufnr)
+				end
+			end,
+			group = navic_augroup,
+			buffer = bufnr,
+		})
+	end
 	vim.api.nvim_create_autocmd("BufDelete", {
 		callback = function()
 			lib.clear_buffer_data(bufnr)
