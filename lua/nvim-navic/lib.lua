@@ -254,13 +254,17 @@ function M.request_symbol(for_buf, handler, client, file_uri)
 		}
 	end
 
+	if not vim.api.nvim_buf_is_loaded(for_buf) then
+		return
+	end
+
 	client.request("textDocument/documentSymbol", { textDocument = textDocument_argument }, function(err, symbols, _)
 		if err ~= nil or symbols == nil then
 			vim.defer_fn(function()
 				M.request_symbol(for_buf, handler, client)
 			end, 750)
 		elseif symbols ~= nil then
-			if vim.api.nvim_buf_is_valid(for_buf) then
+			if vim.api.nvim_buf_is_loaded(for_buf) then
 				handler(for_buf, symbols)
 			end
 		end
