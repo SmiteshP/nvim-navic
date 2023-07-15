@@ -243,8 +243,15 @@ function M.parse(symbols)
 end
 
 -- Make request to lsp server
-function M.request_symbol(for_buf, handler, client, file_uri)
+function M.request_symbol(for_buf, handler, client, file_uri, retry_count)
 	local textDocument_argument = vim.lsp.util.make_text_document_params()
+
+	if retry_count == nil then
+		retry_count = 10
+	elseif retry_count == 0 then
+		handler(for_buf, {})
+		return
+	end
 
 	if file_uri ~= nil then
 		textDocument_argument = {
@@ -259,10 +266,16 @@ function M.request_symbol(for_buf, handler, client, file_uri)
 	end
 
 	client.request("textDocument/documentSymbol", { textDocument = textDocument_argument }, function(err, symbols, _)
-		if err ~= nil or symbols == nil then
-			vim.defer_fn(function()
-				M.request_symbol(for_buf, handler, client)
-			end, 750)
+		if symbols == nil then
+			if vim.api.nvim_buf_is_valid(for_buf) then
+				handler(for_buf, {})
+			end
+		elseif err ~= nil then
+			if vim.api.nvim_buf_is_valid(for_buf) then
+				vim.defer_fn(function()
+					M.request_symbol(for_buf, handler, client, file_uri, retry_count-1)
+				end, 750)
+			end
 		elseif symbols ~= nil then
 			if vim.api.nvim_buf_is_loaded(for_buf) then
 				handler(for_buf, symbols)
