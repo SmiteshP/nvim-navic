@@ -267,9 +267,11 @@ function M.request_symbol(for_buf, handler, client, file_uri, retry_count)
 				handler(for_buf, {})
 			end
 		elseif err ~= nil then
-			vim.defer_fn(function()
-				M.request_symbol(for_buf, handler, client, file_uri, retry_count-1)
-			end, 750)
+			if vim.api.nvim_buf_is_valid(for_buf) then
+				vim.defer_fn(function()
+					M.request_symbol(for_buf, handler, client, file_uri, retry_count-1)
+				end, 750)
+			end
 		elseif symbols ~= nil then
 			if vim.api.nvim_buf_is_valid(for_buf) then
 				handler(for_buf, symbols)
