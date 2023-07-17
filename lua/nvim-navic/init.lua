@@ -288,7 +288,7 @@ end
 
 function M.get_location(opts, bufnr)
 	local data = M.get_data(bufnr)
-    return M.format_data(opts, data)
+	return M.format_data(opts, data)
 end
 
 local awaiting_lsp_response = {}

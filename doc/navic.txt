@@ -51,11 +51,11 @@ API                                                                 *navic-api*
 	buffer is used.
 
 *navic.format_data* (data, opts)
-    Formats data of the type returned by *navic.get_data* for use in the
-    statusline or winbar. This can be used to modify the raw data before
-    formatting it.
-    |opts| table can be passed to override any of |nvim-navic|'s options.
-    Follows same table format as *navic-setup*'s opts table.
+	Formats data of the type returned by *navic.get_data* for use in the
+	statusline or winbar. This can be used to modify the raw data before
+	formatting it.
+	|opts| table can be passed to override any of |nvim-navic|'s options.
+	Follows same table format as *navic-setup*'s opts table.
 
 =============================================================================
 Usage                                                             *navic-usage*
