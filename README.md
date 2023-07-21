@@ -386,3 +386,61 @@ If you have a creative use case and want the raw context data to work with, you 
  }
 ```
 </details>
+
+If you work with raw context data, you may want to render a modified version of it. In order to ensure a consistent format with `get_location`, you may use the following function:
+
+* `format_data(data, opts)` : Returns a pretty string (with the same format as `get_location`) with the context information provided in `data`. Using `opts` table you can override any of the options, format same as the table for setup function. If the `opts` parameter is omitted, the globally configured options are used.
+
+<details>
+<summary>An example usage of <code>format_data</code>:</summary>
+
+Consider the scenario of working in deeply nested namespaces. Typically, just the namespace names will occupy quite some space in your statusline. With the following snippet, nested namespace names are truncated and combined into a single component:
+
+```lua
+-- Customized navic.get_location() that combines namespaces into a single string.
+-- Example: `adam::bob::charlie > foo` is transformed into `a::b::charlie > foo`
+function()
+    local navic = require("nvim-navic")
+    local old_data = navic.get_data()
+    local new_data = {}
+    local cur_ns = nil
+    local ns_comps = {}
+
+    for _, comp in ipairs(old_data) do
+        if comp.type == "Namespace" then
+            cur_ns = comp
+            table.insert(ns_comps, comp.name)
+        else
+            -- On the first non-namespace component $c$, collect
+            -- previous NS components into a single one and
+            -- insert it in front of $c$.
+            if cur_ns ~= nil then
+                -- Concatenate name and insert
+                local num_comps = #ns_comps
+                local comb_name = ""
+                for idx = 1, num_comps do
+                    local ns_name = ns_comps[idx]
+
+                    -- No "::" in front of first component
+                    local join = (idx == 1) and "" or "::"
+
+                    if idx ~= num_comps then
+                        comb_name = comb_name .. join .. ns_name:sub(1, 1)
+                    else
+                        comb_name = comb_name .. join .. ns_name
+                    end
+                end
+
+                cur_ns.name = comb_name
+                table.insert(new_data, cur_ns)
+                cur_ns = nil
+            end
+
+            table.insert(new_data, comp)
+        end
+    end
+
+    return navic.format_data(new_data)
+end
+```
+</details>

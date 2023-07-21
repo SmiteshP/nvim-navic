@@ -162,7 +162,11 @@ function M.is_available(bufnr)
 	return vim.b[bufnr].navic_client_id ~= nil
 end
 
-function M.get_location(opts, bufnr)
+function M.format_data(data, opts)
+	if data == nil then
+		return ""
+	end
+
 	local local_config = {}
 
 	if opts ~= nil then
@@ -198,11 +202,6 @@ function M.get_location(opts, bufnr)
 		local_config = config
 	end
 
-	local data = M.get_data(bufnr)
-
-	if data == nil then
-		return ""
-	end
 
 	local location = {}
 
@@ -285,6 +284,11 @@ function M.get_location(opts, bufnr)
 	end
 
 	return ret
+end
+
+function M.get_location(opts, bufnr)
+	local data = M.get_data(bufnr)
+	return M.format_data(opts, data)
 end
 
 local awaiting_lsp_response = {}
