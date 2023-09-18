@@ -4,15 +4,15 @@ A simple statusline/winbar component that shows your current code context.
 Named after the Indian satellite navigation system.
 
 Requires :
-*nvim-lspconfig* `https://github.com/neovim/nvim-lspconfig`
-*Neovim* 0.7 or above
+- nvim-lspconfig: `https://github.com/neovim/nvim-lspconfig`
+- Neovim: 0.7 or above
 
 =============================================================================
 CONTENTS                                                     *navic-components*
 
 API                                                                 |navic-api|
 Usage                                                             |navic-usage|
-Variables                                                     navic-variables
+Variables                                                     |navic-variables|
 Customisation                                                 |navic-customise|
 Highlights                                                   |navic-highlights|
 
@@ -22,7 +22,7 @@ API                                                                 *navic-api*
 |nvim-navic| provides the following functions for the user.
 
 *navic.setup* (opts)
-	Configure |nvim-navic|'s options. See more *navic-configuration*.
+	Configure |nvim-navic|'s options. See more |navic-configuration|.
 
 *navic.attach* (client, bufnr)
 	Used to attach |nvim-navic| to lsp server. Pass this function as
@@ -38,7 +38,7 @@ API                                                                 *navic-api*
 	Returns a pretty string that shows code context and can be used directly
 	in statusline or winbar.
 	opts table can be passed to override any of |nvim-navic|'s options.
-    Follows same table format as *navic-setup*|'s opts table. You can pass
+    Follows same table format as |navic-setup|'s opts table. You can pass
     |bufnr| value to determine which buffer is used to get code context. If
     not provided, the current buffer will be used.
 
@@ -55,7 +55,7 @@ API                                                                 *navic-api*
 	statusline or winbar. This can be used to modify the raw data before
 	formatting it.
 	|opts| table can be passed to override any of |nvim-navic|'s options.
-	Follows same table format as *navic-setup*'s opts table.
+	Follows same table format as |navic-setup|'s opts table.
 
 =============================================================================
 Usage                                                             *navic-usage*
@@ -228,11 +228,11 @@ Use |navic.setup| to override any of the default options
 
 	safe_output: boolean
 		Sanitize the output for use in statusline and winbar.
-	
+
 	click: boolean
 		Single click to goto element, double click to open nvim-navbuddy on
 		the clicked element.
-	
+
 	lazy_update_context: boolean
 		If true, turns off context updates for the "CursorMoved" event,
 		updates will only happen on the "CursorHold" event. The
