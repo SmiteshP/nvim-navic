@@ -99,6 +99,10 @@ function M.setup(opts)
 		return
 	end
 
+  if opts.symbols ~= nil then
+    config.symbols_filter = opts.symbols
+  end
+
 	if opts.lsp ~= nil and opts.lsp.auto_attach then
 		setup_auto_attach(opts)
 	end
@@ -294,7 +298,7 @@ end
 local awaiting_lsp_response = {}
 local function lsp_callback(for_buf, symbols)
 	awaiting_lsp_response[for_buf] = false
-	lib.update_data(for_buf, symbols)
+	lib.update_data(for_buf, lib.filter_symbols(symbols, config.symbols_filter))
 end
 
 function M.attach(client, bufnr)
