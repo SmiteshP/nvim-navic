@@ -1,9 +1,25 @@
 local lib = require("nvim-navic.lib")
 
+---@class LspOptions
+---@field auto_attach boolean
+---@field preference table | nil
+
+---@class Options
+---@field icons table | nil
+---@field highlight boolean | nil
+---@field format_text function | nil
+---@field depth_limit number | nil
+---@field depth_limit_indicator string | nil
+---@field lazy_update_context boolean | nil
+---@field safe_output boolean | nil
+---@field click boolean | nil
+---@field lsp LspOptions | nil
+
 -- @Public Methods
 
 local M = {}
 
+---@type Options
 local config = {
 	icons = {
 		[1] = "󰈙 ", -- File
@@ -44,7 +60,8 @@ local config = {
 	lsp = {
 		auto_attach = false,
 		preference = nil
-	}
+	},
+	format_text = function(a) return a end,
 }
 
 setmetatable(config.icons, {
@@ -94,6 +111,7 @@ local function setup_auto_attach(opts)
 	})
 end
 
+---@param opts Options
 function M.setup(opts)
 	if opts == nil then
 		return
@@ -128,6 +146,10 @@ function M.setup(opts)
 	end
 	if opts.lazy_update_context then
 		config.lazy_update_context = opts.lazy_update_context
+	end
+	if opts.format_text then
+		vim.validate({ format_text = { opts.format_text, "f" } })
+		config.format_text = opts.format_text
 	end
 end
 
@@ -211,7 +233,7 @@ function M.format_data(data, opts)
 			.. "#"
 			.. local_config.icons[kind]
 			.. "%*%#NavicText#"
-			.. name
+			.. config.format_text(name)
 			.. "%*"
 	end
 

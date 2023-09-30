@@ -78,6 +78,7 @@ Use the `setup` function to modify default parameters.
 * `highlight` : If set to true, will add colors to icons and text as defined by highlight groups `NavicIcons*` (`NavicIconsFile`, `NavicIconsModule`.. etc.), `NavicText` and `NavicSeparator`.
 * `depth_limit` : Maximum depth of context to be shown. If the context hits this depth limit, it is truncated.
 * `depth_limit_indicator` : Icon to indicate that `depth_limit` was hit and the shown context is truncated.
+* `format_text` : A function to customize the text displayed in each segment.
 * `lazy_update_context` : If true, turns off context updates for the "CursorMoved" event.
 * `safe_output` : Sanitize the output for use in statusline and winbar.
 * `click` : Single click to goto element, double click to open nvim-navbuddy on the clicked element.
@@ -125,7 +126,10 @@ navic.setup {
     depth_limit_indicator = "..",
     safe_output = true,
     lazy_update_context = false,
-    click = false
+    click = false,
+    format_text = function(text)
+        return text
+    end,
 }
 
 ```
