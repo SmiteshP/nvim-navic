@@ -283,7 +283,7 @@ function M.format_data(data, opts)
 		ret = table.concat(location, local_config.separator)
 	end
 
-	return ret
+	return string.gsub(ret, "%%%*$", "")
 end
 
 function M.get_location(opts, bufnr)
