@@ -147,6 +147,9 @@ function M.setup(opts)
 	if opts.lazy_update_context then
 		config.lazy_update_context = opts.lazy_update_context
 	end
+	if opts.click then
+		config.click = opts.click
+	end
 	if opts.format_text then
 		vim.validate({ format_text = { opts.format_text, "f" } })
 		config.format_text = opts.format_text
