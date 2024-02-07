@@ -396,7 +396,9 @@ function M.attach(client, bufnr)
 	if config.update_in_insert then
 		vim.api.nvim_create_autocmd("CursorHoldI", {
 			callback = function()
-				lib.update_context(bufnr)
+				if vim.b.navix_update_in_insert ~= false then
+					lib.update_context(bufnr)
+				end
 			end,
 			group = navic_augroup,
 			buffer = bufnr,
@@ -405,7 +407,7 @@ function M.attach(client, bufnr)
 			vim.api.nvim_create_autocmd("CursorMovedI", {
 				callback = function()
 					if vim.b.navic_lazy_update_in_insert ~= true
-						or vim.b.navic_update_in_insert ~= true
+						or vim.b.navic_update_in_insert ~= false
 					then
 						lib.update_context(bufnr)
 					end
