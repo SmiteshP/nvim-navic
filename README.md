@@ -70,6 +70,10 @@ require("lspconfig").clangd.setup {
 
 >NOTE: You can set `vim.b.navic_lazy_update_context = true` for specific buffers, where you want the the updates to not occur on every `CursorMoved` event. It should help if you are facing performance issues in large files. Read the docs for example usage of this variable. Alternatively, you can pass `lazy_update_context=true` to the `setup` function to turn off context updates on the `CursorMoved` event completely for all buffers. It's useful when you just want context updates to happen only on `CursorHold` events and not on `CursorMoved`.
 
+>NOTE: You can set `vim.b.navic_lazy_update_in_insert = false` for specific buffers, where you don't want for context updates to occur on `CursorMovedI` events. Just as with `vim.b.navic_lazy_update_context = true`, this should help mitigate performance issues in large files, for Insert mode.
+
+>NOTE: You can set `vim.b.navic_update_in_insert = false` to completely disable context updates for specific buffers, for `CursorMovedI` and `CursorHoldI` events.
+
 ## 🪄 Customise
 
 Use the `setup` function to modify default parameters.
@@ -128,6 +132,7 @@ navic.setup {
     safe_output = true,
     lazy_update_context = false,
     update_in_insert = false,
+    lazy_update_in_insert = false,
     click = false,
     format_text = function(text)
         return text
