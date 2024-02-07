@@ -202,6 +202,23 @@ you are facing performance issues on large files. Example usage
 		end,
 	})
 <
+
+*vim.b.navic_lazy_update_in_insert*
+Set it to true to update context only on CursorHoldI event, if using `update_in_insert`. Could be usefull if
+you are facing performance issues on large files. Example usage
+>lua
+	vim.api.nvim_create_autocmd("BufEnter", {
+		callback = function()
+			if vim.api.nvim_buf_line_count(0) > 10000 then
+				vim.b.navic_lazy_update_in_insert = true
+			end
+		end,
+	})
+<
+
+*vim.b.navic_update_in_insert*
+Set it to false to disable updating context on CursorHoldI and CursorMovedI events.
+
 =============================================================================
 Customisation                                                 *navic-customise*
 
@@ -242,6 +259,15 @@ Use |navic.setup| to override any of the default options
 		vim.b.navic_lazy_update_context variable allows you to control that
 		behavior with more flexibility, like disabling context updates
 		depending on file size, total lines etc.
+
+	update_in_insert: boolean
+		If true, turns on context updates for "CursorHoldI" and "CursorMovedI" events,
+		to see changes in context while in Insert mode.
+
+	lazy_update_in_insert: boolean
+		If true, turns off context updates for the "CursorMovedI" event,
+		with updates happening only on the "CursorHoldI" event.
+		The same benefits as with the `lazy_update_context` option apply, just for Insert mode.
 
 	lsp :
 		auto_attach: boolean
@@ -296,6 +322,8 @@ Defaults >lua
 		depth_limit_indicator = "..",
 		safe_output = true,
 		lazy_update_context = false,
+		update_in_insert = false,
+		lazy_update_in_insert = false,
 		click = false
 	}
 <
