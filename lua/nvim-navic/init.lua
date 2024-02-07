@@ -57,6 +57,7 @@ local config = {
 	safe_output = true,
 	lazy_update_context = false,
 	update_in_insert = false,
+	lazy_update_in_insert = false,
 	click = false,
 	lsp = {
 		auto_attach = false,
@@ -150,6 +151,9 @@ function M.setup(opts)
 	end
 	if opts.update_in_insert then
 		config.update_in_insert = opts.update_in_insert
+	end
+	if opts.lazy_update_in_insert then
+		config.lazy_update_in_insert = opts.lazy_update_in_insert
 	end
 	if opts.click then
 		config.click = opts.click
@@ -400,7 +404,9 @@ function M.attach(client, bufnr)
 		if not config.lazy_update_context then
 			vim.api.nvim_create_autocmd("CursorMovedI", {
 				callback = function()
-					if vim.b.navic_update_in_insert ~= true then
+					if vim.b.navic_lazy_update_in_insert ~= true
+						or vim.b.navic_update_in_insert ~= true
+					then
 						lib.update_context(bufnr)
 					end
 				end,
