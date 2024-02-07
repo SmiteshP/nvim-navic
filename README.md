@@ -80,6 +80,7 @@ Use the `setup` function to modify default parameters.
 * `depth_limit_indicator` : Icon to indicate that `depth_limit` was hit and the shown context is truncated.
 * `format_text` : A function to customize the text displayed in each segment.
 * `lazy_update_context` : If true, turns off context updates for the "CursorMoved" event.
+* `update_in_insert` : If true, turns on context updates for the "CursorMovedI" and "CursorHoldI" events.
 * `safe_output` : Sanitize the output for use in statusline and winbar.
 * `click` : Single click to goto element, double click to open nvim-navbuddy on the clicked element.
 * `lsp` :
@@ -126,6 +127,7 @@ navic.setup {
     depth_limit_indicator = "..",
     safe_output = true,
     lazy_update_context = false,
+    update_in_insert = false,
     click = false,
     format_text = function(text)
         return text
