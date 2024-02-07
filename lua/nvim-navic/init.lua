@@ -11,6 +11,8 @@ local lib = require("nvim-navic.lib")
 ---@field depth_limit number | nil
 ---@field depth_limit_indicator string | nil
 ---@field lazy_update_context boolean | nil
+---@field update_in_insert boolean | nil
+---@field lazy_update_in_insert boolean | nil
 ---@field safe_output boolean | nil
 ---@field click boolean | nil
 ---@field lsp LspOptions | nil
