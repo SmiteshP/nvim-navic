@@ -398,7 +398,7 @@ function M.attach(client, bufnr)
 	if config.update_in_insert then
 		vim.api.nvim_create_autocmd("CursorHoldI", {
 			callback = function()
-				if vim.b.navic_update_in_insert ~= false then
+				if vim.b.navic_update_in_insert == false then
 					lib.update_context(bufnr)
 				end
 			end,
