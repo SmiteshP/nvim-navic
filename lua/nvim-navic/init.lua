@@ -409,7 +409,7 @@ function M.attach(client, bufnr)
 			vim.api.nvim_create_autocmd("CursorMovedI", {
 				callback = function()
 					if vim.b.navic_lazy_update_in_insert ~= true
-						or vim.b.navic_update_in_insert == true
+						and vim.b.navic_update_in_insert == true
 					then
 						lib.update_context(bufnr)
 					end
