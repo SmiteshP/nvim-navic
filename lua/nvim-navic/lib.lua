@@ -266,7 +266,7 @@ function M.request_symbol(for_buf, handler, client, file_uri, retry_count)
 	end
 
 	local function request(...)
-		if vim.fn.has('nvim-0.11') then
+		if vim.fn.has('nvim-0.11') == 1 then
 			client:request(...)
 		else
 			client.request(...)
