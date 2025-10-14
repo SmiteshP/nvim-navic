@@ -272,23 +272,23 @@ function M.request_symbol(for_buf, handler, client, file_uri, retry_count)
 			client.request(...)
 		end
 	end
-	request("textDocument/documentSymbol", { textDocument = textDocument_argument }, function(err, symbols, _)
-		if symbols == nil then
-			if vim.api.nvim_buf_is_valid(for_buf) then
-				handler(for_buf, {})
-			end
-		elseif err ~= nil then
-			if vim.api.nvim_buf_is_valid(for_buf) then
-				vim.defer_fn(function()
-					M.request_symbol(for_buf, handler, client, file_uri, retry_count-1)
-				end, 750)
-			end
-		elseif symbols ~= nil then
-			if vim.api.nvim_buf_is_loaded(for_buf) then
-				handler(for_buf, symbols)
-			end
-		end
-	end, for_buf)
+    request("textDocument/documentSymbol", { textDocument = textDocument_argument }, function(err, symbols, _)
+        if err ~= nil then
+            if vim.api.nvim_buf_is_valid(for_buf) then
+                vim.defer_fn(function()
+                    M.request_symbol(for_buf, handler, client, file_uri, retry_count-1)
+                end, 750)
+            end
+        elseif symbols == nil then
+            if vim.api.nvim_buf_is_valid(for_buf) then
+                handler(for_buf, {})
+            end
+        elseif symbols ~= nil then
+            if vim.api.nvim_buf_is_loaded(for_buf) then
+                handler(for_buf, symbols)
+            end
+        end
+    end, for_buf)
 end
 
 local navic_symbols = {}
