@@ -22,6 +22,7 @@ local M = {}
 ---@type Options
 local config = {
 	icons = {
+		enabled = true,
 		[1] = "󰈙 ", -- File
 		[2] = " ", -- Module
 		[3] = "󰌗 ", -- Namespace
@@ -127,8 +128,10 @@ function M.setup(opts)
 				config.icons[lib.adapt_lsp_str_to_num(k)] = v
 			end
 		end
+		if opts.icons.enabled ~= nil then
+			config.icons.enabled = opts.icons.enabled
+		end
 	end
-
 	if opts.separator ~= nil then
 		config.separator = opts.separator
 	end
@@ -203,8 +206,10 @@ function M.format_data(data, opts)
 					local_config.icons[lib.adapt_lsp_str_to_num(k)] = v
 				end
 			end
+			if opts.icons.enabled ~= nil then
+				local_config.icons.enabled = opts.icons.enabled
+			end
 		end
-
 		if opts.separator ~= nil then
 			local_config.separator = opts.separator
 		end
@@ -231,11 +236,16 @@ function M.format_data(data, opts)
 	local location = {}
 
 	local function add_hl(kind, name)
-		return "%#NavicIcons"
-			.. lib.adapt_lsp_num_to_str(kind)
-			.. "#"
-			.. local_config.icons[kind]
-			.. "%*%#NavicText#"
+		local icon_part = ""
+		if local_config.icons.enabled then
+			icon_part = "%#NavicIcons"
+				.. lib.adapt_lsp_num_to_str(kind)
+				.. "#"
+				.. local_config.icons[kind]
+				.. "%*"
+		end
+		return icon_part
+			.. "%#NavicText#"
 			.. config.format_text(name)
 			.. "%*"
 	end
@@ -281,7 +291,11 @@ function M.format_data(data, opts)
 		if local_config.highlight then
 			component = add_hl(v.kind, name)
 		else
-			component = v.icon .. name
+			if local_config.icons.enabled then
+				component = v.icon .. name
+			else
+				component = name
+			end
 		end
 
 		if local_config.click then
