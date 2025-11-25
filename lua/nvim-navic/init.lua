@@ -389,7 +389,7 @@ function M.attach(client, bufnr)
 		buffer = bufnr,
 	})
 	if not config.lazy_update_context then
-		vim.api.nvim_create_autocmd("CursorMoved", {
+		vim.api.nvim_create_autocmd({"CursorMoved", "CursorMovedI"}, {
 			callback = function()
 				if vim.b.navic_lazy_update_context ~= true then
 					lib.update_context(bufnr)
