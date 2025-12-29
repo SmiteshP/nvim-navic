@@ -42,11 +42,13 @@ Example:
 ```lua
 local navic = require("nvim-navic")
 
-require("lspconfig").clangd.setup {
+vim.lsp.config('clangd', {
     on_attach = function(client, bufnr)
         navic.attach(client, bufnr)
     end
-}
+})
+
+vim.lsp.enable('clangd')
 ```
 
 If you're sharing your `on-attach` function between lspconfigs, better wrap nvim-navic's `attach` function to make sure `documentSymbolProvider` is enabled:
@@ -61,9 +63,11 @@ local on_attach = function(client, bufnr)
     ...
 end
 
-require("lspconfig").clangd.setup {
+vim.lsp.config('clangd', {
     on_attach = on_attach
-}
+})
+
+vim.lsp.enable('clangd')
 ```
 
 >NOTE: You can set `vim.g.navic_silence = true` to supress error messages thrown by nvim-navic. However this is not recommended as the error messages indicate that there is problem in your setup. That is, you are attaching nvim-navic to servers that don't support documentSymbol or are attaching navic to multiple servers for a single buffer.
