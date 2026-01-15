@@ -74,6 +74,10 @@ vim.lsp.enable('clangd')
 
 >NOTE: You can set `vim.b.navic_lazy_update_context = true` for specific buffers, where you want the the updates to not occur on every `CursorMoved` event. It should help if you are facing performance issues in large files. Read the docs for example usage of this variable. Alternatively, you can pass `lazy_update_context=true` to the `setup` function to turn off context updates on the `CursorMoved` event completely for all buffers. It's useful when you just want context updates to happen only on `CursorHold` events and not on `CursorMoved`.
 
+>NOTE: You can set `vim.b.navic_lazy_update_in_insert = false` for specific buffers, where you don't want for context updates to occur on `CursorMovedI` events. Just as with `vim.b.navic_lazy_update_context = true`, this should help mitigate performance issues in large files, for Insert mode.
+
+>NOTE: You can set `vim.b.navic_update_in_insert = false` to completely disable context updates for specific buffers, for `CursorMovedI` and `CursorHoldI` events.
+
 ## 🪄 Customise
 
 Use the `setup` function to modify default parameters.
@@ -85,6 +89,7 @@ Use the `setup` function to modify default parameters.
 * `depth_limit_indicator` : Icon to indicate that `depth_limit` was hit and the shown context is truncated.
 * `format_text` : A function to customize the text displayed in each segment.
 * `lazy_update_context` : If true, turns off context updates for the "CursorMoved" event.
+* `update_in_insert` : If true, turns on context updates for the "CursorMovedI" and "CursorHoldI" events.
 * `safe_output` : Sanitize the output for use in statusline and winbar.
 * `click` : Single click to goto element, double click to open nvim-navbuddy on the clicked element.
 * `lsp` :
@@ -132,6 +137,8 @@ navic.setup {
     depth_limit_indicator = "..",
     safe_output = true,
     lazy_update_context = false,
+    update_in_insert = false,
+    lazy_update_in_insert = false,
     click = false,
     format_text = function(text)
         return text
