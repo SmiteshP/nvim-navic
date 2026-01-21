@@ -455,4 +455,14 @@ function M.adapt_lsp_num_to_str(n)
 	return lsp_num_to_str[n]
 end
 
+function M.filter_symbols(symbols, symbols_filter)
+  if not symbols_filter then
+    return symbols
+  end
+
+  return vim.tbl_filter(function(symbol)
+    return vim.tbl_contains(symbols_filter, M.adapt_lsp_num_to_str(symbol.kind))
+  end, symbols)
+end
+
 return M
