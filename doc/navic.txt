@@ -28,6 +28,13 @@ API                                                                 *navic-api*
 	Used to attach |nvim-navic| to lsp server. Pass this function as
 	on_attach while setting up your desired lsp server.
 
+*navic.attach_coc* (bufnr)
+	Used to attach |nvim-navic| to coc.nvim for the given buffer. Requires
+	coc.nvim to be running. You can skip calling this function if you have
+	enabled the coc auto_attach option during setup.
+	'bufnr' is optional argument. If bufnr is not provied, current open
+	buffer is used.
+
 *navic.is_available* (bufnr)
 	Returns boolean value indicating whether |nvim-navic| is able to provide
 	output for current buffer.
@@ -71,6 +78,16 @@ Example: >lua
 		on_attach = function(client, bufnr)
 			navic.attach(client, bufnr)
 		end
+	}
+<
+
+If you use coc.nvim instead of the builtin lsp client, enable the coc
+auto_attach option (or call |navic.attach_coc| yourself):
+>lua
+	require("nvim-navic").setup {
+		coc = {
+			auto_attach = true,
+		},
 	}
 <
 
@@ -258,6 +275,11 @@ Use |navic.setup| to override any of the default options
 			and the preference list is `{ "clangd", "pyright" }`. Then clangd
 			will be preferred.
 
+	coc :
+		auto_attach: boolean
+			Enable to have nvim-navic automatically attach to buffers handled
+			by coc.nvim. Its disabled by default.
+
 Defaults >lua
 	navic.setup {
 		icons = {
@@ -292,6 +314,9 @@ Defaults >lua
 		lsp = {
 			auto_attach = false,
 			preference = nil,
+		},
+		coc = {
+			auto_attach = false,
 		},
 		highlight = false,
 		separator = " > ",

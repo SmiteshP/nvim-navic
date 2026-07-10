@@ -4,6 +4,9 @@ local lib = require("nvim-navic.lib")
 ---@field auto_attach boolean
 ---@field preference table | nil
 
+---@class CocOptions
+---@field auto_attach boolean
+
 ---@class Options
 ---@field icons table | nil
 ---@field highlight boolean | nil
@@ -14,6 +17,7 @@ local lib = require("nvim-navic.lib")
 ---@field safe_output boolean | nil
 ---@field click boolean | nil
 ---@field lsp LspOptions | nil
+---@field coc CocOptions | nil
 
 -- @Public Methods
 
@@ -61,6 +65,9 @@ local config = {
 	lsp = {
 		auto_attach = false,
 		preference = nil
+	},
+	coc = {
+		auto_attach = false
 	},
 	format_text = function(a) return a end,
 }
@@ -112,6 +119,34 @@ local function setup_auto_attach(opts)
 	})
 end
 
+local function setup_coc_auto_attach()
+	-- coc.nvim does not have an equivalent of the LspAttach event, and
+	-- extensions register their symbol providers asynchronously. Keep
+	-- checking for a documentSymbol provider until one shows up.
+	vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold", "CursorHoldI" }, {
+		callback = function(args)
+			local bufnr = args.buf
+			if vim.b[bufnr].navic_client_id ~= nil then
+				return
+			end
+			if vim.g.coc_service_initialized ~= 1 or vim.bo[bufnr].buftype ~= "" then
+				return
+			end
+			-- hasProvider only works on the current buffer
+			vim.fn.CocActionAsync("hasProvider", "documentSymbol", function(err, has_provider)
+				if
+					(err == nil or err == vim.NIL)
+					and has_provider == true
+					and vim.api.nvim_get_current_buf() == bufnr
+					and vim.b[bufnr].navic_client_id == nil
+				then
+					M.attach_coc(bufnr)
+				end
+			end)
+		end,
+	})
+end
+
 ---@param opts Options
 function M.setup(opts)
 	if opts == nil then
@@ -120,6 +155,10 @@ function M.setup(opts)
 
 	if opts.lsp ~= nil and opts.lsp.auto_attach then
 		setup_auto_attach(opts)
+	end
+
+	if opts.coc ~= nil and opts.coc.auto_attach then
+		setup_coc_auto_attach()
 	end
 
 	if opts.icons ~= nil then
@@ -336,33 +375,9 @@ local function lsp_callback(for_buf, symbols)
 	lib.update_data(for_buf, symbols)
 end
 
-function M.attach(client, bufnr)
-	if not client.server_capabilities.documentSymbolProvider then
-		if not vim.g.navic_silence then
-			vim.notify(
-				'nvim-navic: Server "' .. client.name .. '" does not support documentSymbols.',
-				vim.log.levels.ERROR
-			)
-		end
-		return
-	end
-
-	if vim.b[bufnr].navic_client_id ~= nil and vim.b[bufnr].navic_client_name ~= client.name then
-		local prev_client = vim.b[bufnr].navic_client_name
-		if not vim.g.navic_silence then
-			vim.notify(
-				"nvim-navic: Failed to attach to "
-					.. client.name
-					.. " for current buffer. Already attached to "
-					.. prev_client,
-				vim.log.levels.WARN
-			)
-		end
-		return
-	end
-
-	vim.b[bufnr].navic_client_id = client.id
-	vim.b[bufnr].navic_client_name = client.name
+-- Set up the autocmds for a buffer and make the first symbol request.
+-- request_fn is called as request_fn(bufnr, lsp_callback) to fetch symbols.
+local function setup_buffer(bufnr, request_fn)
 	local changedtick = 0
 
 	local navic_augroup = vim.api.nvim_create_augroup("navic", { clear = false })
@@ -375,7 +390,7 @@ function M.attach(client, bufnr)
 			if not awaiting_lsp_response[bufnr] and changedtick < vim.b[bufnr].changedtick then
 				awaiting_lsp_response[bufnr] = true
 				changedtick = vim.b[bufnr].changedtick
-				lib.request_symbol(bufnr, lsp_callback, client)
+				request_fn(bufnr, lsp_callback)
 			end
 		end,
 		group = navic_augroup,
@@ -409,7 +424,68 @@ function M.attach(client, bufnr)
 
 	-- First call
 	vim.b[bufnr].navic_awaiting_lsp_response = true
-	lib.request_symbol(bufnr, lsp_callback, client)
+	request_fn(bufnr, lsp_callback)
+end
+
+function M.attach(client, bufnr)
+	if not client.server_capabilities.documentSymbolProvider then
+		if not vim.g.navic_silence then
+			vim.notify(
+				'nvim-navic: Server "' .. client.name .. '" does not support documentSymbols.',
+				vim.log.levels.ERROR
+			)
+		end
+		return
+	end
+
+	if vim.b[bufnr].navic_client_id ~= nil and vim.b[bufnr].navic_client_name ~= client.name then
+		local prev_client = vim.b[bufnr].navic_client_name
+		if not vim.g.navic_silence then
+			vim.notify(
+				"nvim-navic: Failed to attach to "
+					.. client.name
+					.. " for current buffer. Already attached to "
+					.. prev_client,
+				vim.log.levels.WARN
+			)
+		end
+		return
+	end
+
+	vim.b[bufnr].navic_client_id = client.id
+	vim.b[bufnr].navic_client_name = client.name
+
+	setup_buffer(bufnr, function(for_buf, callback)
+		lib.request_symbol(for_buf, callback, client)
+	end)
+end
+
+function M.attach_coc(bufnr)
+	bufnr = bufnr or vim.api.nvim_get_current_buf()
+
+	if vim.fn.exists("*CocActionAsync") == 0 then
+		if not vim.g.navic_silence then
+			vim.notify("nvim-navic: coc.nvim is not available.", vim.log.levels.ERROR)
+		end
+		return
+	end
+
+	if vim.b[bufnr].navic_client_id ~= nil and vim.b[bufnr].navic_client_name ~= "coc" then
+		local prev_client = vim.b[bufnr].navic_client_name
+		if not vim.g.navic_silence then
+			vim.notify(
+				"nvim-navic: Failed to attach to coc for current buffer. Already attached to " .. prev_client,
+				vim.log.levels.WARN
+			)
+		end
+		return
+	end
+
+	-- coc.nvim does not expose a client id, use -1 to mark the buffer as attached
+	vim.b[bufnr].navic_client_id = -1
+	vim.b[bufnr].navic_client_name = "coc"
+
+	setup_buffer(bufnr, lib.request_coc_symbol)
 end
 
 return M

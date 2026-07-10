@@ -10,7 +10,7 @@ Named after the Indian satellite navigation system.
 ## ⚡️ Requirements
 
 * Neovim >= 0.7.0
-* [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig)
+* [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig) or [coc.nvim](https://github.com/neoclide/coc.nvim)
 
 ## 📦 Installation
 
@@ -70,6 +70,20 @@ vim.lsp.config('clangd', {
 vim.lsp.enable('clangd')
 ```
 
+### coc.nvim
+
+If you use [coc.nvim](https://github.com/neoclide/coc.nvim) instead of the builtin LSP client, enable the `coc.auto_attach` option and nvim-navic will attach to buffers that have a coc documentSymbol provider:
+
+```lua
+require("nvim-navic").setup {
+    coc = {
+        auto_attach = true,
+    },
+}
+```
+
+Alternatively you can attach manually with `navic.attach_coc(bufnr)`, for example from an autocommand of your choosing.
+
 >NOTE: You can set `vim.g.navic_silence = true` to supress error messages thrown by nvim-navic. However this is not recommended as the error messages indicate that there is problem in your setup. That is, you are attaching nvim-navic to servers that don't support documentSymbol or are attaching navic to multiple servers for a single buffer.
 
 >NOTE: You can set `vim.b.navic_lazy_update_context = true` for specific buffers, where you want the the updates to not occur on every `CursorMoved` event. It should help if you are facing performance issues in large files. Read the docs for example usage of this variable. Alternatively, you can pass `lazy_update_context=true` to the `setup` function to turn off context updates on the `CursorMoved` event completely for all buffers. It's useful when you just want context updates to happen only on `CursorHold` events and not on `CursorMoved`.
@@ -90,6 +104,8 @@ Use the `setup` function to modify default parameters.
 * `lsp` :
     * `auto_attach` : Enable to have nvim-navic automatically attach to every LSP for current buffer. Its disabled by default.
     * `preference` : Table ranking lsp_servers. Lower the index, higher the priority of the server. If there are more than one server attached to a buffer, nvim-navic will refer to this list to make a decision on which one to use. For example - In case a buffer is attached to clangd and ccls both and the preference list is `{ "clangd", "pyright" }`. Then clangd will be preferred.
+* `coc` :
+    * `auto_attach` : Enable to have nvim-navic automatically attach to buffers handled by coc.nvim. Its disabled by default.
 
 ```lua
 navic.setup {
@@ -125,6 +141,9 @@ navic.setup {
     lsp = {
         auto_attach = false,
         preference = nil,
+    },
+    coc = {
+        auto_attach = false,
     },
     highlight = false,
     separator = " > ",
