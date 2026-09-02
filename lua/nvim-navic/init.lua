@@ -154,7 +154,11 @@ function M.setup(opts)
 		config.click = opts.click
 	end
 	if opts.format_text then
-		vim.validate({ format_text = { opts.format_text, "f" } })
+		if vim.fn.has("nvim-0.11") == 1 then
+			vim.validate("format_text", opts.format_text, "function")
+		else
+			vim.validate({ format_text = { opts.format_text, "f" } })
+		end
 		config.format_text = opts.format_text
 	end
 end
