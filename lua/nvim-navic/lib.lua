@@ -455,4 +455,70 @@ function M.adapt_lsp_num_to_str(n)
 	return lsp_num_to_str[n]
 end
 
+-- coc.nvim's documentSymbols action returns a flat list of symbols where
+-- nesting is expressed through the "level" field. Convert it back into the
+-- hierarchical DocumentSymbol format that M.parse understands.
+local function coc_to_document_symbols(coc_symbols)
+	local root = { children = {} }
+	local stack = { root }
+
+	for _, symbol in ipairs(coc_symbols) do
+		if type(symbol) == "table" and symbol.range ~= nil then
+			local node = {
+				name = symbol.text,
+				kind = lsp_str_to_num[symbol.kind],
+				range = symbol.range,
+				-- deepcopy since M.parse modifies ranges in place
+				selectionRange = symbol.selectionRange or vim.deepcopy(symbol.range),
+			}
+
+			local level = symbol.level or 0
+			while #stack > level + 1 do
+				table.remove(stack)
+			end
+
+			local parent = stack[#stack]
+			if parent.children == nil then
+				parent.children = {}
+			end
+			table.insert(parent.children, node)
+			table.insert(stack, node)
+		end
+	end
+
+	return root.children
+end
+
+-- Make request to coc.nvim
+function M.request_coc_symbol(for_buf, handler, retry_count)
+	if retry_count == nil then
+		retry_count = 10
+	elseif retry_count == 0 then
+		handler(for_buf, {})
+		return
+	end
+
+	if not vim.api.nvim_buf_is_loaded(for_buf) then
+		return
+	end
+
+	vim.fn.CocActionAsync("documentSymbols", for_buf, function(err, symbols)
+		if err ~= nil and err ~= vim.NIL then
+			if vim.api.nvim_buf_is_valid(for_buf) then
+				vim.defer_fn(function()
+					M.request_coc_symbol(for_buf, handler, retry_count - 1)
+				end, 750)
+			end
+		elseif symbols == nil or symbols == vim.NIL then
+			if vim.api.nvim_buf_is_valid(for_buf) then
+				handler(for_buf, {})
+			end
+		else
+			if vim.api.nvim_buf_is_loaded(for_buf) then
+				handler(for_buf, coc_to_document_symbols(symbols))
+			end
+		end
+	end)
+end
+
 return M
